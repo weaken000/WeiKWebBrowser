@@ -58,15 +58,15 @@ static const CGFloat kReservedCompressSpace = 10;
 
 //需要使用根节点调用对象方法
 - (NodeView *)shouldCompress {
-    if (!_nextView) {//没有后节点，已经查找到最后，不能压，直接返回
+    if (!_preView) {//没有后节点，已经查找到最后，不能压，直接返回
         return nil;
     }
-    if (_nextView.frame.origin.y - self.frame.origin.y <= kReservedCompressSpace) {
+    if (self.frame.origin.y - _preView.frame.origin.y <= kReservedCompressSpace) {
         //当前压到最大值，不能再压，看看后节点能不能压
-        return [_nextView shouldCompress];
+        return [_preView shouldCompress];
     }
-    else {//还可以压，返回后节点，设置y值
-        return _nextView;
+    else {//还可以压，返回当前节点，设置y值
+        return self;
     }
 }
 
@@ -92,6 +92,9 @@ static const CGFloat kReservedCompressSpace = 10;
     CGRect frame = _originRect;
     frame.origin.y += y;
     //校对,最大不能大于最大临界
+    if (frame.origin.y < _preView.frame.origin.y + kReservedCompressSpace) {
+        frame.origin.y = _preView.frame.origin.y + kReservedCompressSpace;
+    }
     frame.origin.y = MIN(frame.origin.y, _preView.frame.origin.y+kReservedStretchSpace);
     self.frame = frame;
     
@@ -102,6 +105,8 @@ static const CGFloat kReservedCompressSpace = 10;
         [_preView updateStretchY:y-(kReservedStretchSpace-orginOffsetY)];
     }
 }
+
+
 
 //y都是通过pan手势获得，所以不能每次都直接操作frame，应该操作每次静止时的frame(originRect)
 - (void)updateCompressY:(CGFloat)y {
@@ -116,14 +121,16 @@ static const CGFloat kReservedCompressSpace = 10;
         else {//未达到临界值，当前节点之后的所有节点都需要同时移动相同距离
 
             if (self.nextView) {
-
-                CGRect frame = self.nextView.originRect;
+                
+                if (y > 0) {
+                    y = -y;
+                }
+                
+                CGRect frame = self.nextView.frame;
                 frame.origin.y += y;
-                //校对
                 frame.origin.y = MAX(frame.origin.y, self.frame.origin.y + kReservedCompressSpace);
                 self.nextView.frame = frame;
-
-                [self.nextView updateNextY:y];//直接跟随
+                [_nextView updateCompressY:y];
             }
         }
     }
@@ -137,9 +144,11 @@ static const CGFloat kReservedCompressSpace = 10;
  
  v1 originY = 40 y = 40; v2 originY = 80  y = 80;   v3  originY = 120 y = 120  
  offsetY = 140拉                                          到达临界
- v1              y = 40; v2       +30     y = 110;  v3    +110 +30    y = 260
- offsetY = 80压
- v1              y = 40; v3       -30     y = 50;   v3    +80         y = 200
+ v1              y = 40; v2       +30    y = 110;  v3    +110 +30    y = 260
+ offsetY = 130压                +20           100        +130         y = 250
+ 120                            +10           90
+ 110                             +0           50
+ v1              y = 40; v3    +50--?     y = 50;  v3    +130        y = 250
  
  
  v1 originY = 40 y = 40; v2 originY = 190  y = 190;   v3  originY = 340 y = 340
@@ -155,7 +164,7 @@ static const CGFloat kReservedCompressSpace = 10;
 
 @end
 
-@interface PageTabViewController ()<UIGestureRecognizerDelegate>
+@interface PageTabViewController ()<UIGestureRecognizerDelegate, UIScrollViewDelegate>
 
 @property (nonatomic, strong) NSArray<NodeView *> *viewArray;
 
@@ -178,11 +187,12 @@ static const CGFloat kReservedCompressSpace = 10;
     
     _scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(20, 100, self.view.frame.size.width-40, self.view.bounds.size.height-130)];
     _scrollView.backgroundColor = [UIColor grayColor];
+    _scrollView.delegate = self;
     [self.view addSubview:_scrollView];
     CATransform3D transform = CATransform3DIdentity;
     transform.m34 = -1 / 500.0;
     _scrollView.layer.sublayerTransform = transform;
-    _scrollView.contentSize = CGSizeMake(self.view.frame.size.width-40, 4 * 150 + 20);
+    _scrollView.contentSize = CGSizeMake(self.view.frame.size.width-40, 6 * kReservedStretchSpace + kReservedStretchSpace);
     
     UIPanGestureRecognizer *pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(swipeView:)];
     pan.delegate = self;
@@ -199,7 +209,6 @@ static const CGFloat kReservedCompressSpace = 10;
             CGFloat offsetY = [gesture translationInView:gesture.view].y;
             
             if (offsetY > _lastOffsetY && [_activityView shouldStretch]) {//可以拉伸
-                _scrollView.scrollEnabled = NO;
                 //当前节点向前
                 [_activityView updateStretchY:offsetY];
                 [_activityView updateNextY:offsetY];
@@ -207,27 +216,12 @@ static const CGFloat kReservedCompressSpace = 10;
                 return;
             }
             
-            if (offsetY < _lastOffsetY && [_viewArray.lastObject shouldCompress]) {//可以压缩
-                
-                if (_lastOffsetY != 0) {
-                    offsetY -= _lastOffsetY;
-                }
-                else {
-                    _lastOffsetY = offsetY;
-                }
-                
-                _scrollView.scrollEnabled = NO;
+            if (offsetY < _lastOffsetY && [_activityView shouldCompress]) {//可以压缩
                 //根节点向后
-                [_viewArray.lastObject updateCompressY:offsetY];
-                
+                [_viewArray.lastObject updateCompressY:_lastOffsetY-offsetY];
+                _lastOffsetY = offsetY;
                 return;
             }
-            
-            _lastOffsetY = 0;
-            if (!_scrollView.isScrollEnabled) {
-                _scrollView.scrollEnabled = YES;
-            }
-            
         }
             break;
         case UIGestureRecognizerStateFailed:
@@ -245,22 +239,34 @@ static const CGFloat kReservedCompressSpace = 10;
 }
 
 #pragma mark - UIGestureRecognizerDelegate
-- (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer {
+- (BOOL)gestureRecognizerShouldBegin:(UIPanGestureRecognizer *)gestureRecognizer {
+    
+    _activityView = nil;
+    
     CGPoint point = [gestureRecognizer locationInView:gestureRecognizer.view];
     if (point.y > CGRectGetMaxY(_lastInsertView.frame)) {//不在点击区域时，都不滑动
         _scrollView.scrollEnabled = NO;
         return NO;
     }
-    _scrollView.scrollEnabled = YES;
+    
     //计算获取activityView
-    _activityView = nil;
     for (NodeView *view in _viewArray) {
         if (view.frame.origin.y <= point.y) {
-            _activityView = view;
-            break;
+            //判断当前view是否可以拉动缩动
+            CGFloat offsetY = [gestureRecognizer translationInView:gestureRecognizer.view].y;
+            if ((offsetY > 0 && [view shouldStretch]) || (offsetY < 0 && [view shouldCompress])) {//可以滑动
+                _activityView = view;
+                _scrollView.scrollEnabled = NO;
+                return YES;
+            }
+            else {//不可滑动
+                _scrollView.scrollEnabled = YES;
+                return NO;
+            }
         }
+        
     }
-    return YES;
+    return NO;
 }
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
@@ -270,6 +276,12 @@ static const CGFloat kReservedCompressSpace = 10;
 //- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldBeRequiredToFailByGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
 //    return YES;
 //}
+
+#pragma mark - UIScrollViewDelegate
+- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate {
+    scrollView.scrollEnabled = YES;
+    [scrollView setContentOffset:CGPointZero animated:YES];
+}
 
 
 #pragma mark - create
@@ -281,17 +293,29 @@ static const CGFloat kReservedCompressSpace = 10;
     view1.originRect = CGRectMake(0, 40, totalW, 300);
     [_scrollView addSubview:view1];
 
-    NodeView *view2 = [self createLayerWithFrame:CGRectMake(0, 190, totalW, 300)];
+    NodeView *view2 = [self createLayerWithFrame:CGRectMake(0, 40+kReservedCompressSpace, totalW, 300)];
     view2.originRect = CGRectMake(0, 190, totalW, 300);
     [_scrollView addSubview:view2];
     
-    NodeView *view3 = [self createLayerWithFrame:CGRectMake(0, 340, totalW, 300)];
+    NodeView *view3 = [self createLayerWithFrame:CGRectMake(0, 40+2*kReservedCompressSpace, totalW, 300)];
     view3.originRect = CGRectMake(0, 340, totalW, 300);
     [_scrollView addSubview:view3];
     
-    _lastInsertView = view3;
+    NodeView *view4 = [self createLayerWithFrame:CGRectMake(0, 40+3*kReservedCompressSpace, totalW, 300)];
+    view4.originRect = CGRectMake(0, 340, totalW, 300);
+    [_scrollView addSubview:view4];
     
-    _viewArray = @[view3, view2, view1];
+    NodeView *view5 = [self createLayerWithFrame:CGRectMake(0, 40+3*kReservedCompressSpace+kReservedStretchSpace, totalW, 300)];
+    view5.originRect = CGRectMake(0, 340, totalW, 300);
+    [_scrollView addSubview:view5];
+    
+    NodeView *view6 = [self createLayerWithFrame:CGRectMake(0, 40+3*kReservedCompressSpace+2*kReservedStretchSpace, totalW, 300)];
+    view6.originRect = CGRectMake(0, 340, totalW, 300);
+    [_scrollView addSubview:view6];
+    
+    _lastInsertView = view6;
+    
+    _viewArray = @[view6, view5, view4, view3, view2, view1];
     
     view1.nextView = view2;
     
@@ -299,6 +323,15 @@ static const CGFloat kReservedCompressSpace = 10;
     view2.nextView = view3;
     
     view3.preView = view2;
+    view3.nextView = view4;
+    
+    view4.preView = view3;
+    view4.nextView = view5;
+    
+    view5.preView = view4;
+    view5.nextView = view6;
+    
+    view6.preView = view5;
     
 }
 
