@@ -119,54 +119,27 @@ static const CGFloat kReservedCompressSpace = 10;
             [_nextView updateCompressY:y];
         }
         else {//未达到临界值，当前节点之后的所有节点都需要同时移动相同距离
-
-            if (self.nextView) {
-                
-                if (y > 0) {
-                    y = -y;
-                }
-                
-                CGRect frame = self.nextView.frame;
-                frame.origin.y += y;
-                frame.origin.y = MAX(frame.origin.y, self.frame.origin.y + kReservedCompressSpace);
-                self.nextView.frame = frame;
-                [_nextView updateCompressY:y];
+            if (y > 0) {
+                y = -y;
             }
+            
+            CGRect frame = self.nextView.frame;
+            frame.origin.y += y;
+            frame.origin.y = MAX(frame.origin.y, self.frame.origin.y + kReservedCompressSpace);
+            self.nextView.frame = frame;
+            [_nextView updateCompressY:y];
         }
     }
     
 }
-
-
-
-/*
- 
- 
- v1 originY = 40 y = 40; v2 originY = 80  y = 80;   v3  originY = 120 y = 120  
- offsetY = 140拉                                          到达临界
- v1              y = 40; v2       +30    y = 110;  v3    +110 +30    y = 260
- offsetY = 130压                +20           100        +130         y = 250
- 120                            +10           90
- 110                             +0           50
- v1              y = 40; v3    +50--?     y = 50;  v3    +130        y = 250
- 
- 
- v1 originY = 40 y = 40; v2 originY = 190  y = 190;   v3  originY = 340 y = 340
- offsetY = -30压
- v1              y = 40; v2       -30      y = 160;   v3     -30        y = 310
- offsetY = -150压
- v1              y = 40; v2       -140     y = 50;    v3     -150       y = 170
-
- 
- */
-
-
 
 @end
 
 @interface PageTabViewController ()<UIGestureRecognizerDelegate, UIScrollViewDelegate>
 
 @property (nonatomic, strong) NSArray<NodeView *> *viewArray;
+
+@property (nonatomic, strong) CADisplayLink *tiemr;
 
 @end
 
@@ -178,12 +151,21 @@ static const CGFloat kReservedCompressSpace = 10;
     NodeView *_activityView;
     
     CGFloat _lastOffsetY;
+    
+    CGFloat _fromOffsetY;
+    CGFloat _toOffsetY;
+    
+    CFTimeInterval _duraction;
+    CFTimeInterval _lastStep;
+    CFTimeInterval _timeOffset;
+    
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     
     self.view.backgroundColor = [UIColor whiteColor];
+    _duraction = 1.0;
     
     _scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(20, 100, self.view.frame.size.width-40, self.view.bounds.size.height-130)];
     _scrollView.backgroundColor = [UIColor grayColor];
@@ -193,7 +175,7 @@ static const CGFloat kReservedCompressSpace = 10;
     transform.m34 = -1 / 500.0;
     _scrollView.layer.sublayerTransform = transform;
     _scrollView.contentSize = CGSizeMake(self.view.frame.size.width-40, 6 * kReservedStretchSpace + kReservedStretchSpace);
-    
+
     UIPanGestureRecognizer *pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(swipeView:)];
     pan.delegate = self;
     [_scrollView addGestureRecognizer:pan];
@@ -201,35 +183,97 @@ static const CGFloat kReservedCompressSpace = 10;
     [self deapPages];
 }
 
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [self.navigationController setNavigationBarHidden:NO animated:animated];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [_tiemr invalidate];
+    [super viewWillDisappear:animated];
+    [self.navigationController setNavigationBarHidden:YES animated:animated];
+}
+
+#pragma mark - function
+- (float)interpolateFromValue:(float)fromValue time:(float)time
+{
+    return interpolate(fromValue, _toOffsetY, time);
+}
+
+float interpolate(float from, float to, float time)
+{
+    return (to - from) * time + from;
+}
+float CubicEaseOut(float p)
+{
+    float f = (p - 1);
+    return f * f * f * f * f + 1;
+}
+
+#pragma mark - private
+- (void)timeInvalidate {
+    if (_tiemr) {
+        [_tiemr invalidate];
+        _tiemr = nil;
+    }
+    
+    _activityView = nil;
+    _fromOffsetY = 0;
+    _toOffsetY = 0;
+    _lastStep = 0;
+    _timeOffset = 0;
+    _lastOffsetY = 0;
+    
+    for (NodeView *view in _viewArray) {
+        view.originRect = view.frame;
+    }
+}
+
+- (void)deapPageScroll:(CGFloat)scrollOffsetY isAuto:(BOOL)isAuto {
+    if (scrollOffsetY > _lastOffsetY && [_activityView shouldStretch]) {//可以拉伸
+        //当前节点向前
+        [_activityView updateStretchY:scrollOffsetY];
+        [_activityView updateNextY:scrollOffsetY];
+        _lastOffsetY = scrollOffsetY;
+        if (!isAuto) {
+            _fromOffsetY = scrollOffsetY;
+            _toOffsetY = scrollOffsetY + 60.0;
+        }
+        return;
+    }
+    
+    if (scrollOffsetY < _lastOffsetY && [_activityView shouldCompress]) {//可以压缩
+        //根节点向后
+        [_viewArray.lastObject updateCompressY:_lastOffsetY-scrollOffsetY];
+        _lastOffsetY = scrollOffsetY;
+        if (!isAuto) {
+            _fromOffsetY = scrollOffsetY;
+            _toOffsetY = scrollOffsetY - 60.0;
+        }
+        return;
+    }
+}
+
+#pragma mark - SEL
 - (void)swipeView:(UIPanGestureRecognizer *)gesture {
 
     switch (gesture.state) {
         case UIGestureRecognizerStateChanged: {
-            
             CGFloat offsetY = [gesture translationInView:gesture.view].y;
-            
-            if (offsetY > _lastOffsetY && [_activityView shouldStretch]) {//可以拉伸
-                //当前节点向前
-                [_activityView updateStretchY:offsetY];
-                [_activityView updateNextY:offsetY];
-                _lastOffsetY = offsetY;
-                return;
-            }
-            
-            if (offsetY < _lastOffsetY && [_activityView shouldCompress]) {//可以压缩
-                //根节点向后
-                [_viewArray.lastObject updateCompressY:_lastOffsetY-offsetY];
-                _lastOffsetY = offsetY;
-                return;
-            }
+            [self deapPageScroll:offsetY isAuto:NO];
         }
             break;
         case UIGestureRecognizerStateFailed:
         case UIGestureRecognizerStateEnded:
         case UIGestureRecognizerStateCancelled: {
-            _lastOffsetY = 0;
-            for (NodeView *view in _viewArray) {
-                view.originRect = view.frame;
+            
+            if (_activityView) {
+                _lastStep = CACurrentMediaTime();
+                _tiemr = [CADisplayLink displayLinkWithTarget:self selector:@selector(timePast:)];
+                [_tiemr addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+            }
+            else {
+                [self timeInvalidate];
             }
         }
             break;
@@ -238,10 +282,27 @@ static const CGFloat kReservedCompressSpace = 10;
     }
 }
 
+- (void)timePast:(CADisplayLink *)timer {
+    
+    CFTimeInterval thisStep = CACurrentMediaTime();
+    CFTimeInterval stepDuration = thisStep - _lastStep;
+    _lastStep = thisStep;
+    _timeOffset = MIN(_timeOffset + stepDuration, _duraction);
+    float time = _timeOffset / _duraction;
+    time = CubicEaseOut(time);
+    
+    float offsetY = [self interpolateFromValue:_fromOffsetY time:time];
+    [self deapPageScroll:offsetY isAuto:YES];
+    
+    if (_timeOffset >= _duraction) {
+        [self timeInvalidate];
+    }
+}
+
 #pragma mark - UIGestureRecognizerDelegate
 - (BOOL)gestureRecognizerShouldBegin:(UIPanGestureRecognizer *)gestureRecognizer {
     
-    _activityView = nil;
+    [self timeInvalidate];
     
     CGPoint point = [gestureRecognizer locationInView:gestureRecognizer.view];
     if (point.y > CGRectGetMaxY(_lastInsertView.frame)) {//不在点击区域时，都不滑动
@@ -272,16 +333,17 @@ static const CGFloat kReservedCompressSpace = 10;
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
     return YES;
 }
+
 ////只有当前手势失败时，才去执行其他手势
 //- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldBeRequiredToFailByGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
 //    return YES;
 //}
 
 #pragma mark - UIScrollViewDelegate
-- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate {
-    scrollView.scrollEnabled = YES;
-    [scrollView setContentOffset:CGPointZero animated:YES];
-}
+//- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate {
+//    scrollView.scrollEnabled = YES;
+//    [scrollView setContentOffset:CGPointZero animated:YES];
+//}
 
 
 #pragma mark - create
@@ -340,11 +402,11 @@ static const CGFloat kReservedCompressSpace = 10;
     NodeView *view = [[NodeView alloc] initWithFrame:frame];
     view.layer.backgroundColor = [UIColor colorWithWhite:0.7 alpha:1.0].CGColor;
     view.layer.cornerRadius = 8.0;
-    view.layer.zPosition = -5;
+    view.layer.zPosition    = -5;
     
     view.layer.shadowOpacity = 0.3;
-    view.layer.shadowRadius = 10;
-    view.layer.shadowOffset = CGSizeMake(0, -5);
+    view.layer.shadowRadius  = 10;
+    view.layer.shadowOffset  = CGSizeMake(0, -5);
     
     return view;
 }
