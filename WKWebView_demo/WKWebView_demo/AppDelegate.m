@@ -8,6 +8,9 @@
 
 #import "AppDelegate.h"
 
+#import "DataBaseHelper.h"
+#import "BrowsedModel.h"
+
 @interface AppDelegate ()
 
 @end
@@ -16,7 +19,21 @@
 
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    // Override point for customization after application launch.
+    
+    DataBaseHelper *helper = [DataBaseHelper sharedInstance];
+    
+    BrowsedModel *model = [BrowsedModel new];
+    model.title = @"百度一下";
+    model.absoluteURL = @"https://www.baidu.com";
+    model.type = BrowsedModelTypeHistory;
+    model.createDate = [[NSDate date] timeIntervalSince1970];
+    [DataBaseHelper insertBrowsedRecord:model complete:^(BOOL succese) {
+        NSLog(@"%zd", succese);
+    }];
+    [DataBaseHelper selectBrowsedWhereCondition:@"" complete:^(BOOL success, NSArray *array) {
+        NSLog(@"%@", array);
+    }];
+    
     return YES;
 }
 
