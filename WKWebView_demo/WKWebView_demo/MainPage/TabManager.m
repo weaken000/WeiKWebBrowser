@@ -211,6 +211,26 @@ static pthread_mutex_t pLock;
         [self cacheHistoryModel:model immediately:NO];
         _lastTitle = webView.title;
     }
+    
+    
+//    static  NSString * const jsGetImages =
+//    @"function getImages(){\
+//    var objs = document.getElementsByTagName(\"img\");\
+//    var imgScr = '';\
+//    for(var i=0;i<objs.length;i++){\
+//    imgScr = imgScr + objs[i].src + '+';\
+//    };\
+//    return imgScr;\
+//    };";
+//
+//    [webView evaluateJavaScript:jsGetImages completionHandler:nil];
+//    [webView evaluateJavaScript:@"getImages()" completionHandler:^(id _Nullable result, NSError * _Nullable error) {
+//
+//        NSArray *urlArray = [NSMutableArray arrayWithArray:[result componentsSeparatedByString:@"+"]];
+//        //urlResurlt 就是获取到得所有图片的url的拼接；mUrlArray就是所有Url的数组
+//        NSLog(@"--%@",urlArray);
+//    }];
+    
 }
 // 页面加载失败时调用
 - (void)webView:(WKWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation{

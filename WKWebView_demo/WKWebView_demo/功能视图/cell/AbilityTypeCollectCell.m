@@ -8,6 +8,8 @@
 
 #import "AbilityTypeCollectCell.h"
 #import "BrowsedModel.h"
+#import "UIImageView+WebCache.h"
+
 
 @implementation AbilityTypeCollectCell {
     UIImageView *_imageView;
@@ -47,6 +49,8 @@
 - (void)setModel:(BrowsedModel *)model {
     _model = model;
     _titleLab.text = model.title;
+    [_imageView sd_setImageWithURL:model.iconURL];
+
 }
 
 @end

@@ -8,6 +8,7 @@
 
 #import "AbilityTypeHistoryCell.h"
 #import "BrowsedModel.h"
+#import "UIImageView+WebCache.h"
 
 @implementation AbilityTypeHistoryCell {
     UIImageView *_imageView;
@@ -56,6 +57,7 @@
     _model = model;
     _titleLab.text = model.title;
     _urlLab.text = model.absoluteURL;
+    [_imageView sd_setImageWithURL:model.iconURL];
 }
 
 @end

@@ -9,6 +9,7 @@
 #import "AbilityTypeHomeURLCell.h"
 #import "Masonry.h"
 #import "BrowsedModel.h"
+#import "UIImageView+WebCache.h"
 
 @implementation AbilityTypeHomeURLCell {
     UIImageView *_iconImageView;
@@ -24,7 +25,6 @@
 
 - (void)initSubviews {
     _iconImageView = [UIImageView new];
-    _iconImageView.backgroundColor = [UIColor purpleColor];
     _iconImageView.layer.cornerRadius = 5.0;
     [self.contentView addSubview:_iconImageView];
     
@@ -45,6 +45,9 @@
 - (void)setBrowserModel:(BrowsedModel *)browserModel {
     _browserModel = browserModel;
     _urlNameLab.text = browserModel.title;
+    
+    [_iconImageView sd_setImageWithURL:browserModel.iconURL];
 }
+
 
 @end

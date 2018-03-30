@@ -49,19 +49,19 @@
             if (!_browserList.count) {
                 BrowsedModel *model_1 = [BrowsedModel new];
                 model_1.title = @"百度";
-                model_1.absoluteURL = @"https://www.baidu.com/";
+                model_1.absoluteURL = @"https://m.baidu.com/";
                 model_1.type = BrowsedModelTypeHome;
                 model_1.createDate = [[NSDate date] timeIntervalSince1970];
                 
                 BrowsedModel *model_2 = [BrowsedModel new];
                 model_2.title = @"搜狐";
-                model_2.absoluteURL = @"http://www.sohu.com/";
+                model_2.absoluteURL = @"https://m.sohu.com/";
                 model_2.type = BrowsedModelTypeHome;
                 model_2.createDate = [[NSDate date] timeIntervalSince1970];
                 
                 BrowsedModel *model_3 = [BrowsedModel new];
                 model_3.title = @"360";
-                model_3.absoluteURL = @"https://www.so.com/";
+                model_3.absoluteURL = @"https://m.so.com/";
                 model_3.type = BrowsedModelTypeHome;
                 model_3.createDate = [[NSDate date] timeIntervalSince1970];
                 
@@ -85,7 +85,7 @@
                 
                 BrowsedModel *model_7 = [BrowsedModel new];
                 model_7.title = @"今日头条";
-                model_7.absoluteURL = @"https://www.toutiao.com/";
+                model_7.absoluteURL = @"https://m.toutiao.com/";
                 model_7.type = BrowsedModelTypeHome;
                 model_7.createDate = [[NSDate date] timeIntervalSince1970];
                 

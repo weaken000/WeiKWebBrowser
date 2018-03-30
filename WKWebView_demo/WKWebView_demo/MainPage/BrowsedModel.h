@@ -24,4 +24,6 @@ typedef enum : NSUInteger {
 
 @property (nonatomic, assign) long createDate;
 
+@property (nonatomic, strong) NSURL *iconURL;
+
 @end

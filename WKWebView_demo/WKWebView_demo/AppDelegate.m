@@ -22,6 +22,10 @@
     
     (void)[DataBaseHelper sharedInstance];
     
+//    [DataBaseHelper deleteBrowsedWhereCondition:@"where type = 3" complete:^(BOOL success) {
+//
+//    }];
+    
     return YES;
 }
 

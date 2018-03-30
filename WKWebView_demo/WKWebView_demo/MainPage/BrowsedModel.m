@@ -10,4 +10,15 @@
 
 @implementation BrowsedModel
 
+- (NSURL *)iconURL {
+    
+    NSURL *url = [NSURL URLWithString:self.absoluteURL];
+    
+    NSURLComponents *comp = [NSURLComponents new];
+    comp.scheme = url.scheme;
+    comp.host = url.host;
+    comp.path = @"/favicon.ico";
+    return comp.URL;
+}
+
 @end
