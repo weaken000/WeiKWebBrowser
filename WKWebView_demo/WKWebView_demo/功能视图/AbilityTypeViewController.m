@@ -51,12 +51,15 @@
     [self.view addSubview:_scrollView];
     
     _homeView = [[AbilityTypeHomeView alloc] initWithFrame:CGRectMake(0, 0, _scrollView.bounds.size.width, _scrollView.bounds.size.height)];
+    _homeView.Index = 0;
     [_scrollView addSubview:_homeView];
     
     _collectView = [[AbilityTypeCollectView alloc] initWithFrame:CGRectMake(_scrollView.bounds.size.width, 0, _scrollView.bounds.size.width, _scrollView.bounds.size.height)];
+    _collectView.Index = 1;
     [_scrollView addSubview:_collectView];
     
     _historyView = [[AbilityTypeHistoryView alloc] initWithFrame:CGRectMake(_scrollView.bounds.size.width*2, 0, _scrollView.bounds.size.width, _scrollView.bounds.size.height)];
+    _historyView.Index = 2;
     [_scrollView addSubview:_historyView];
     
     _homeView.abilityVC = self;
@@ -66,6 +69,12 @@
     __weak typeof(self) weakSelf = self;
     _scrollTypeView.typeSelectChanged = ^(NSInteger selectIndex) {
         [weakSelf.scrollView setContentOffset:CGPointMake(selectIndex * weakSelf.view.bounds.size.width, 0) animated:YES];
+        for (UIView *view in weakSelf.scrollView.subviews) {
+            if ([view isKindOfClass:[UIImageView class]]) {
+                continue;
+            }
+            [view setValue:@(selectIndex) forKey:@"currentShowIndex"];
+        }
     };
 }
 
@@ -78,6 +87,19 @@
     if ([self.delegate respondsToSelector:@selector(ability:didClickURL:)]) {
         [self.delegate ability:self didClickURL:url];
     }
+}
+
+- (void)abilityHidden:(BOOL)hidden {
+    if (!hidden && self.view.isHidden) {
+        for (UIView *view in self.scrollView.subviews) {
+            if ([view isKindOfClass:[UIImageView class]]) {
+                continue;
+            }
+            [view setValue:@(_scrollTypeView.selectIndex) forKey:@"currentShowIndex"];
+        }
+    }
+    self.view.hidden = hidden;
+
 }
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {

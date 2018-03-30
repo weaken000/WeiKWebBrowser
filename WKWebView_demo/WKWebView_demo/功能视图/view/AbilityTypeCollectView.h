@@ -10,6 +10,11 @@
 #import "AbilityTypeViewController.h"
 
 @interface AbilityTypeCollectView : UIView
+
 @property (nonatomic, weak) AbilityTypeViewController *abilityVC;
+
+@property (nonatomic, assign) NSInteger Index;
+
+@property (nonatomic, assign) NSInteger currentShowIndex;
 
 @end

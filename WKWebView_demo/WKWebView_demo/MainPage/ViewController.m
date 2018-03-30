@@ -23,7 +23,7 @@
 #import "WKMessageHandler.h"
 #import <WebKit/WebKit.h>
 
-@interface ViewController ()<TabToolbarDelegate, TabViewControllerDelegate, AbilityTypeViewControllerDelegate, InputURLViewDelegate>
+@interface ViewController ()<TabToolbarDelegate, TabViewControllerDelegate, AbilityTypeViewControllerDelegate, InputURLViewDelegate, TabManagerDelegate>
 
 @property (nonatomic, strong) TabToolbar *tabToolbar;
 
@@ -51,13 +51,11 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    _lastTitle = @"";
     _tabManager = [TabManager sharedInstance];
+    _tabManager.tabDelegate = self;
     
     [self setupSubviews];
 }
-
-
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
@@ -218,6 +216,28 @@
     [_tabManager.selectTab.webView loadRequest:request];
 }
 
+- (void)showTab:(Tab *)tab {
+    if (_tabManager.selectTab != tab) {//不相同tab，清除当前web，添加选择web的视图
+        [_tabManager.selectTab.webView removeFromSuperview];
+        [_webContainer addSubview:tab.webView];
+        [tab.webView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.edges.mas_equalTo(UIEdgeInsetsZero);
+        }];
+        _tabManager.selectTab = tab;
+    }
+    _urlInputView.currentURL = tab.webView.URL;
+    if (!tab.webView.backForwardList.currentItem) {
+        tab.webView.hidden = YES;
+        [_abilityVC abilityHidden:NO];
+        _urlInputView.isCollect = [_tabManager isCollectWithWebView:tab.webView];
+    }
+    else {
+        tab.webView.hidden = NO;
+        [_abilityVC abilityHidden:YES];
+    }
+    [self addObserversForWebView:tab.webView];
+}
+
 #pragma mark - KVO for WKWebView
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context {
     
@@ -239,14 +259,18 @@
         _urlInputView.currentURL = change[NSKeyValueChangeNewKey];
     }
     else if ([keyPath isEqualToString:@"title"]) {
-        NSString *title = change[NSKeyValueChangeNewKey];
-        if ([_lastTitle compare:title] != NSOrderedSame && title.length) {
-//            _lastTitle = change[NSKeyValueChangeNewKey];
-//            HistoryModel *model = [[HistoryModel alloc] init];
-//            model.title = _lastTitle;
-//            model.url = _tabManager.selectTab.webView.URL.absoluteString;
-        }
+        
     }
+}
+
+#pragma mark - TabManagerDelegate
+- (void)tabManager:(TabManager *)tabManager didCreateTab:(Tab *)tab {
+    [self showTab:tab];
+    tab.webView.hidden = NO;
+    [_abilityVC abilityHidden:YES];
+}
+- (void)tabManager:(TabManager *)tabManager didChangedCollectState:(BOOL)isCollect {
+    _urlInputView.isCollect = isCollect;
 }
 
 #pragma mark - AbilityTypeViewControllerDelegate
@@ -265,14 +289,27 @@
     [self loadURL:newURL];
 }
 
+- (void)inputURLView:(InputURLView *)urlView didClickCollect:(UIButton *)sender {
+    if (!_tabManager.selectTab.webView.isLoading) {
+        _urlInputView.isCollect = [_tabManager collectCurrentURL];
+    }
+}
+
 - (void)inputURLView:(InputURLView *)urlView didIntoFocus:(BOOL)intoFocus {
     if (intoFocus) {//进入输入状态，显示首页
+        [_tabManager cacheHistoryModel:nil immediately:YES];
         _tabManager.selectTab.webView.hidden = YES;
-        _abilityVC.view.hidden = NO;
+        [_abilityVC abilityHidden:NO];
     }
     else {
-        _tabManager.selectTab.webView.hidden = NO;
-        _abilityVC.view.hidden = YES;
+        if (_tabManager.selectTab.webView.URL) {
+            _tabManager.selectTab.webView.hidden = NO;
+            [_abilityVC abilityHidden:YES];
+        }
+        else {
+            _tabManager.selectTab.webView.hidden = YES;
+            [_abilityVC abilityHidden:NO];
+        }
     }
 }
 
@@ -288,6 +325,8 @@
         [_tabManager.selectTab.webView reload];
     }
     else if (index == 3) {
+        [_abilityVC abilityHidden:YES];
+        
         TabViewController *tabVC = [[TabViewController alloc] init];
         tabVC.tabDelegate = self;
         self.navigationController.delegate = tabVC;
@@ -307,28 +346,15 @@
 #pragma mark - TabViewControllerDelegate
 - (void)tabViewControllerDidCreateTab:(TabViewController *)tabViewController {
     Tab *tab = [_tabManager createTab];//添加新的tab
-    [self tabViewController:tabViewController didShowTab:tab];//添加tab视图
+    [self showTab:tab];
 }
 
 - (void)tabViewController:(TabViewController *)tabViewController didShowTab:(Tab *)tab {
-    if (_tabManager.selectTab != tab) {//不相同tab，清除当前web，添加选择web的视图
-        [_tabManager.selectTab.webView removeFromSuperview];
-        [_webContainer addSubview:tab.webView];
-        [tab.webView mas_makeConstraints:^(MASConstraintMaker *make) {
-            make.edges.mas_equalTo(UIEdgeInsetsZero);
-        }];
-        _tabManager.selectTab = tab;
-    }
-    tab.webView.hidden = NO;
-    [self addObserversForWebView:tab.webView];
+    [self showTab:tab];
 }
 
 - (void)tabViewController:(TabViewController *)tabViewController didDeleteTab:(Tab *)tab {
-    if (_tabManager.selectTab == tab) {
-        [tab.webView removeFromSuperview];
-        _tabManager.selectTab = nil;
-    }
-    [_tabManager.tabs removeObject:tab];
+    [_tabManager removeTab:tab];
 }
 
 #pragma mark - UIScrollViewDelegate

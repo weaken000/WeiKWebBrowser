@@ -20,19 +20,7 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     
-    DataBaseHelper *helper = [DataBaseHelper sharedInstance];
-    
-    BrowsedModel *model = [BrowsedModel new];
-    model.title = @"百度一下";
-    model.absoluteURL = @"https://www.baidu.com";
-    model.type = BrowsedModelTypeHistory;
-    model.createDate = [[NSDate date] timeIntervalSince1970];
-    [DataBaseHelper insertBrowsedRecord:model complete:^(BOOL succese) {
-        NSLog(@"%zd", succese);
-    }];
-    [DataBaseHelper selectBrowsedWhereCondition:@"" complete:^(BOOL success, NSArray *array) {
-        NSLog(@"%@", array);
-    }];
+    (void)[DataBaseHelper sharedInstance];
     
     return YES;
 }

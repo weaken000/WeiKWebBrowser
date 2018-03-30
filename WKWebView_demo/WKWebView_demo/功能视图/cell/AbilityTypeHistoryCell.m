@@ -7,6 +7,7 @@
 //
 
 #import "AbilityTypeHistoryCell.h"
+#import "BrowsedModel.h"
 
 @implementation AbilityTypeHistoryCell {
     UIImageView *_imageView;
@@ -49,6 +50,12 @@
     _titleLab.frame = CGRectMake(60, 3, self.bounds.size.width-75, self.bounds.size.height-9-12);
     _urlLab.frame = CGRectMake(60, CGRectGetMaxY(_titleLab.frame)+3, self.bounds.size.width-75, 12);
     _lineView.frame = CGRectMake(60, self.bounds.size.height-1, self.bounds.size.width-60, 1);
+}
+
+- (void)setModel:(BrowsedModel *)model {
+    _model = model;
+    _titleLab.text = model.title;
+    _urlLab.text = model.absoluteURL;
 }
 
 @end

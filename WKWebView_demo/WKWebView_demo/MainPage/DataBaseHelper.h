@@ -14,14 +14,14 @@
 
 + (instancetype)sharedInstance;
 
-+ (void)insertBrowsedRecord:(BrowsedModel *)browsed complete:(void (^)(BOOL))complete;
-+ (void)insertBrowsedRecords:(NSArray<BrowsedModel *> *)browsedList complete:(void (^)(BOOL))complete;
++ (void)insertBrowsedRecord:(BrowsedModel *)browsed complete:(void (^)(BOOL success))complete;
++ (void)insertBrowsedRecords:(NSArray<BrowsedModel *> *)browsedList complete:(void (^)(BOOL success))complete;
 
-+ (void)updateBrowsedRecord:(BrowsedModel *)browsed complete:(void (^)(BOOL))complete;
-+ (void)updateBrowsedRecords:(NSArray<BrowsedModel *> *)browsedList complete:(void (^)(BOOL))complete;
+//+ (void)updateBrowsedRecord:(BrowsedModel *)browsed complete:(void (^)(BOOL))complete;
+//+ (void)updateBrowsedRecords:(NSArray<BrowsedModel *> *)browsedList complete:(void (^)(BOOL))complete;
 
-+ (void)deleteBrowsedWhereCondition:(NSString *)condition complete:(void (^)(BOOL))complete;
++ (void)deleteBrowsedWhereCondition:(NSString *)condition complete:(void (^)(BOOL success))complete;
 
-+ (void)selectBrowsedWhereCondition:(NSString *)condition complete:(void (^)(BOOL, NSArray *))complete;
++ (void)selectBrowsedWhereCondition:(NSString *)condition complete:(void (^)(BOOL success, NSArray *array))complete;
 
 @end

@@ -28,4 +28,6 @@
 
 - (void)subviewDidSelectURL:(NSURL *)url;
 
+- (void)abilityHidden:(BOOL)hidden;
+
 @end

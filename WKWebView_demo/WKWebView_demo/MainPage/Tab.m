@@ -23,14 +23,14 @@ static WKProcessPool *siglePool;
 }
 
 #pragma mark - getter
-- (WKWebView *)webView {
+- (TabWKWebView *)webView {
     if (!_webView) {
         WKWebViewConfiguration *config = [[WKWebViewConfiguration alloc] init];
         config.preferences = [WKPreferences new];
         config.preferences.javaScriptEnabled = YES;
         config.preferences.javaScriptCanOpenWindowsAutomatically = NO;
         config.processPool = siglePool;//共享同一个pool，共享cookie
-        _webView = [[WKWebView alloc] initWithFrame:CGRectZero configuration:config];
+        _webView = [[TabWKWebView alloc] initWithFrame:CGRectZero configuration:config];
     }
     return _webView;
 }

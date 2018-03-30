@@ -10,6 +10,11 @@
 #import "AbilityTypeViewController.h"
 
 @interface AbilityTypeHistoryView : UIView
+
 @property (nonatomic, weak) AbilityTypeViewController *abilityVC;
+
+@property (nonatomic, assign) NSInteger Index;
+
+@property (nonatomic, assign) NSInteger currentShowIndex;
 
 @end

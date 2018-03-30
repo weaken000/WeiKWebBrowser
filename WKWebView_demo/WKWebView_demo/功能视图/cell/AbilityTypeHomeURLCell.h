@@ -8,6 +8,10 @@
 
 #import <UIKit/UIKit.h>
 
+@class BrowsedModel;
+
 @interface AbilityTypeHomeURLCell : UICollectionViewCell
+
+@property (nonatomic, strong) BrowsedModel *browserModel;
 
 @end

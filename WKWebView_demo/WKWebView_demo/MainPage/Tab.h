@@ -8,10 +8,11 @@
 
 #import <Foundation/Foundation.h>
 #import <WebKit/WebKit.h>
+#import "TabWKWebView.h"
 
 @interface Tab : NSObject
 
-@property (nonatomic, strong) WKWebView *webView;
+@property (nonatomic, strong) TabWKWebView *webView;
 
 @property (nonatomic, strong) UIImage *corpImage;
 

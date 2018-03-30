@@ -7,6 +7,7 @@
 //
 
 #import "AbilityTypeCollectCell.h"
+#import "BrowsedModel.h"
 
 @implementation AbilityTypeCollectCell {
     UIImageView *_imageView;
@@ -41,6 +42,11 @@
     _imageView.frame = CGRectMake(15, 5, 30, 30);
     _titleLab.frame = CGRectMake(60, 0, self.bounds.size.width-75, self.bounds.size.height-1);
     _lineView.frame = CGRectMake(60, self.bounds.size.height-1, self.bounds.size.width-60, 1);
+}
+
+- (void)setModel:(BrowsedModel *)model {
+    _model = model;
+    _titleLab.text = model.title;
 }
 
 @end

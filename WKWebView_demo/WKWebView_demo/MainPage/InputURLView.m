@@ -36,8 +36,12 @@
 
 - (void)setCurrentURL:(NSURL *)currentURL {
     _currentURL = currentURL;
-    
-    _normalURLLab.text = [currentURL.resourceSpecifier substringFromIndex:2];
+    if (currentURL.resourceSpecifier.length <= 2 || !currentURL.resourceSpecifier.length) {
+        _normalURLLab.text = currentURL.absoluteString;
+    }
+    else {
+        _normalURLLab.text = [currentURL.resourceSpecifier substringFromIndex:2];
+    }
     _urlTextField.text = currentURL.absoluteString;
 }
 
@@ -88,7 +92,9 @@
     
     _collectButton = [UIButton new];
     [_collectButton setTitle:@"收藏" forState:UIControlStateNormal];
+    [_collectButton setTitle:@"已收藏" forState:UIControlStateSelected];
     [_collectButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+    [_collectButton addTarget:self action:@selector(click_collectButton:) forControlEvents:UIControlEventTouchUpInside];
     [_normalStateBgView addSubview:_collectButton];
 }
 
@@ -180,6 +186,12 @@
     }];
 }
 
+- (void)click_collectButton:(UIButton *)sender {
+    if ([self.delegate respondsToSelector:@selector(inputURLView:didClickCollect:)]) {
+        [self.delegate inputURLView:self didClickCollect:sender];
+    }
+}
+
 - (void)updateConstraints {
     if (_isOnFoucs) {
         [_boardView mas_updateConstraints:^(MASConstraintMaker *make) {
@@ -217,6 +229,11 @@
     else {
         [self click_backButton:_backButton];
     }
+}
+
+- (void)setIsCollect:(BOOL)isCollect {
+    _isCollect = isCollect;
+    _collectButton.selected = isCollect;
 }
 
 @end

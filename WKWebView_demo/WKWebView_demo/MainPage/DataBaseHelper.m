@@ -73,29 +73,34 @@ static DataBaseHelper *_helper;
             
             if (!result) {
                 *rollback = YES;
-                complete(result);
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    complete(result);
+                });
                 return;
             }
         }
-        complete(YES);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            complete(YES);
+        });
     }];
 }
 
-+ (void)updateBrowsedRecord:(BrowsedModel *)browsed complete:(void (^)(BOOL))complete {
-    
-}
-+ (void)updateBrowsedRecords:(NSArray<BrowsedModel *> *)browsedList complete:(void (^)(BOOL))complete {
-    
-}
+
 
 + (void)deleteBrowsedWhereCondition:(NSString *)condition complete:(void (^)(BOOL))complete {
-    
+    [_helper.databaseQueue inDatabase:^(FMDatabase * _Nonnull db) {
+        NSString *sql = [NSString stringWithFormat:@"delete from %@ %@", DB_NAME, condition];
+        BOOL result = [db executeUpdate:sql];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            complete(result);
+        });
+    }];
 }
 
 + (void)selectBrowsedWhereCondition:(NSString *)condition complete:(void (^)(BOOL, NSArray *))complete {
     
     [_helper.databaseQueue inDatabase:^(FMDatabase * _Nonnull db) {
-        NSString *sql = [NSString stringWithFormat:@"select * from %@ %@", DB_NAME, condition];
+        NSString *sql = [NSString stringWithFormat:@"select * from %@ %@ ORDER BY createDate DESC", DB_NAME, condition];
         FMResultSet *resultSet = [db executeQuery:sql];
         NSMutableArray *array = [NSMutableArray array];
         while ([resultSet next]) {
@@ -111,7 +116,9 @@ static DataBaseHelper *_helper;
             model.createDate = date;
             [array addObject:model];
         }
-        complete(YES, array);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            complete(YES, array);
+        });
     }];
     
 }

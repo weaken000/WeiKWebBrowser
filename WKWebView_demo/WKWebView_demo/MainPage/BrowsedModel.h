@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 
 typedef enum : NSUInteger {
-    BrowsedModelTypeHistory,
+    BrowsedModelTypeHistory = 1,
     BrowsedModelTypeCollect,
     BrowsedModelTypeHome
 } BrowsedModelType;

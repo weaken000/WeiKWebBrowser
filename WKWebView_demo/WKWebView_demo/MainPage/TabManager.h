@@ -9,7 +9,15 @@
 #import <Foundation/Foundation.h>
 #import <WebKit/WebKit.h>
 
-@class Tab;
+@class Tab, BrowsedModel, TabManager;
+
+@protocol TabManagerDelegate <NSObject>
+
+- (void)tabManager:(TabManager *)tabManager didCreateTab:(Tab *)tab;
+
+- (void)tabManager:(TabManager *)tabManager didChangedCollectState:(BOOL)isCollect;
+
+@end
 
 @interface TabManager : NSObject
 
@@ -19,8 +27,18 @@
 
 @property (nonatomic, assign) NSInteger selectIndex;
 
+@property (nonatomic, weak  ) id<TabManagerDelegate> tabDelegate;
+
 + (instancetype)sharedInstance;
 
 - (Tab *)createTab;
+
+- (void)removeTab:(Tab *)tab;
+
+- (void)cacheHistoryModel:(BrowsedModel *)model immediately:(BOOL)immediately;
+
+- (BOOL)collectCurrentURL;
+
+- (BOOL)isCollectWithWebView:(WKWebView *)webView;
 
 @end

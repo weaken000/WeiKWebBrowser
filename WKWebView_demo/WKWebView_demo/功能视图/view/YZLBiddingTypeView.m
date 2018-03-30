@@ -127,12 +127,8 @@ static const CGFloat kLineWidth = 80;
         
         if (i <= self.subviews.count - 1) {
             UIButton *sender = self.subviews[i];
-            self.selectIndex = sender.tag;
-            if (sender.isSelected) return;
+            [self click_types:sender];
             
-            sender.selected = YES;
-            _currentButton.selected = NO;
-            _currentButton = sender;
             
         }
     }

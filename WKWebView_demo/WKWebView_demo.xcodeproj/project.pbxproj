@@ -26,6 +26,7 @@
 		4C81B5A220637E540083F209 /* UIView+WebCacheOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C81B59020637E540083F209 /* UIView+WebCacheOperation.m */; };
 		4C81B5A320637E540083F209 /* UIButton+WebCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C81B59420637E540083F209 /* UIButton+WebCache.m */; };
 		4C81B5A6206390AE0083F209 /* WKMessageHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C81B5A5206390AE0083F209 /* WKMessageHandler.m */; };
+		4C947C5B206E052E0023C5E4 /* TabWKWebView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C947C5A206E052E0023C5E4 /* TabWKWebView.m */; };
 		4CA978F22064E3450094EEF3 /* TabViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CA978F12064E3450094EEF3 /* TabViewController.m */; };
 		4CAA54EF206C809900176822 /* NSURL+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CAA54EE206C809800176822 /* NSURL+Extension.m */; };
 		4CAA54F3206C860D00176822 /* WebViewTranstion.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CAA54F2206C860D00176822 /* WebViewTranstion.m */; };
@@ -130,6 +131,8 @@
 		4C81B59520637E540083F209 /* UIImage+GIF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+GIF.h"; sourceTree = "<group>"; };
 		4C81B5A4206390AE0083F209 /* WKMessageHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WKMessageHandler.h; sourceTree = "<group>"; };
 		4C81B5A5206390AE0083F209 /* WKMessageHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WKMessageHandler.m; sourceTree = "<group>"; };
+		4C947C59206E052E0023C5E4 /* TabWKWebView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TabWKWebView.h; sourceTree = "<group>"; };
+		4C947C5A206E052E0023C5E4 /* TabWKWebView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TabWKWebView.m; sourceTree = "<group>"; };
 		4CA978F02064E3440094EEF3 /* TabViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TabViewController.h; sourceTree = "<group>"; };
 		4CA978F12064E3450094EEF3 /* TabViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TabViewController.m; sourceTree = "<group>"; };
 		4CAA54ED206C809800176822 /* NSURL+Extension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSURL+Extension.h"; sourceTree = "<group>"; };
@@ -354,6 +357,8 @@
 				4CE6819C20649BA200881CB5 /* TabManager.m */,
 				4CE6819E20649BAD00881CB5 /* Tab.h */,
 				4CE6819F20649BAD00881CB5 /* Tab.m */,
+				4C947C59206E052E0023C5E4 /* TabWKWebView.h */,
+				4C947C5A206E052E0023C5E4 /* TabWKWebView.m */,
 				4CAA55BA206CE72B00176822 /* BrowsedModel.h */,
 				4CAA55BB206CE72B00176822 /* BrowsedModel.m */,
 				4CAA55BE206CE83C00176822 /* DataBaseHelper.h */,
@@ -684,6 +689,7 @@
 				4CADFD58206B6D7600F74098 /* AbilityTypeHomeURLCell.m in Sources */,
 				4CADFD49206B47EB00F74098 /* MASViewConstraint.m in Sources */,
 				4C0E19FB206B2D3B00A3F57A /* DeviceUtils.m in Sources */,
+				4C947C5B206E052E0023C5E4 /* TabWKWebView.m in Sources */,
 				4CAA55C0206CE83C00176822 /* DataBaseHelper.m in Sources */,
 				4CADFD67206B7B6E00F74098 /* AbilityTypeHistoryView.m in Sources */,
 				4CADFD45206B47EB00F74098 /* MASLayoutConstraint.m in Sources */,

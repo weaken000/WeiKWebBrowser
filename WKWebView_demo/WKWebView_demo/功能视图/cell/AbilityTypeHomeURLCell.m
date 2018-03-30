@@ -8,6 +8,7 @@
 
 #import "AbilityTypeHomeURLCell.h"
 #import "Masonry.h"
+#import "BrowsedModel.h"
 
 @implementation AbilityTypeHomeURLCell {
     UIImageView *_iconImageView;
@@ -28,7 +29,6 @@
     [self.contentView addSubview:_iconImageView];
     
     _urlNameLab = [UILabel new];
-    _urlNameLab.text = @"百度";
     _urlNameLab.font = [UIFont systemFontOfSize:15.0];
     _urlNameLab.textColor = [UIColor blackColor];
     _urlNameLab.textAlignment = NSTextAlignmentCenter;
@@ -40,6 +40,11 @@
     CGFloat w = MIN(self.bounds.size.width, self.bounds.size.height);
     _iconImageView.frame = CGRectMake(0, 0, w, w);
     _urlNameLab.frame = CGRectMake(0, w, w, self.bounds.size.height-w);
+}
+
+- (void)setBrowserModel:(BrowsedModel *)browserModel {
+    _browserModel = browserModel;
+    _urlNameLab.text = browserModel.title;
 }
 
 @end

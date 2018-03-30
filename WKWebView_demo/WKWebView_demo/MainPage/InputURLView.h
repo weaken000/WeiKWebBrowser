@@ -16,6 +16,8 @@
 
 - (void)inputURLView:(InputURLView *)urlView didIntoFocus:(BOOL)intoFocus;
 
+- (void)inputURLView:(InputURLView *)urlView didClickCollect:(UIButton *)sender;
+
 @end
 
 @interface InputURLView : UIView<UITextFieldDelegate>
@@ -23,6 +25,8 @@
 @property (nonatomic, weak) id<InputURLViewDelegate> delegate;
 
 @property (nonatomic, assign) BOOL isOnFocus;
+
+@property (nonatomic, assign) BOOL isCollect;
 
 @property (nonatomic, strong) NSURL *currentURL;
 

@@ -8,6 +8,10 @@
 
 #import <UIKit/UIKit.h>
 
+@class BrowsedModel;
+
 @interface AbilityTypeCollectCell : UITableViewCell
+
+@property (nonatomic, strong) BrowsedModel *model;
 
 @end
