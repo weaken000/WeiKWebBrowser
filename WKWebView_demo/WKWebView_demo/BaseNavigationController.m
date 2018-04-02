@@ -81,9 +81,9 @@
                 }];
             }
             else {
-                [coor notifyWhenInteractionEndsUsingBlock:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
-                    [self dealInteractionChanges:context];
-                }];
+//                [coor notifyWhenInteractionEndsUsingBlock:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
+//                    [self dealInteractionChanges:context];
+//                }];
             }
         }
     }

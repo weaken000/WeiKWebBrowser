@@ -15,10 +15,12 @@
 #import "Tab.h"
 #import "DataBaseHelper.h"
 #import "BrowsedModel.h"
+#import "BrowserModuleConfig.h"
 
 #import "TabViewController.h"
 #import "PageTabViewController.h"
 #import "AbilityTypeViewController.h"
+#import "DownloadListViewController.h"
 
 #import "Masonry.h"
 #import <JavaScriptCore/JavaScriptCore.h>
@@ -88,7 +90,7 @@
     _urlInputView = [[InputURLView alloc] initWithFrame:CGRectZero];
     _urlInputView.delegate = self;
     [_header addSubview:_urlInputView];
-    _tabToolbar = [[TabToolbar alloc] initWithFrame:CGRectZero titles:@[@"后退", @"前进", @"刷新", @"分页", @"首页"]];
+    _tabToolbar = [[TabToolbar alloc] initWithFrame:CGRectZero titles:@[@"后退", @"前进", @"刷新", @"分页", @"功能"]];
     _tabToolbar.delegate = self;
     _tabToolbar.backgroundColor = [UIColor whiteColor];
     [_footer addSubview:_tabToolbar];
@@ -154,12 +156,12 @@
 - (void)addObserversForWebView:(WKWebView *)webView {
     if (!webView) return;
 
-    [webView addObserver:self forKeyPath:@"estimatedProgress" options:NSKeyValueObservingOptionNew context:nil];
-    [webView addObserver:self forKeyPath:@"loading" options:NSKeyValueObservingOptionNew context:nil];
-    [webView addObserver:self forKeyPath:@"canGoBack" options:NSKeyValueObservingOptionNew context:nil];
-    [webView addObserver:self forKeyPath:@"canGoForward" options:NSKeyValueObservingOptionNew context:nil];
-    [webView addObserver:self forKeyPath:@"URL" options:NSKeyValueObservingOptionNew context:nil];
-    [webView addObserver:self forKeyPath:@"title" options:NSKeyValueObservingOptionNew context:nil];
+    [webView addObserver:self forKeyPath:@"estimatedProgress" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld context:nil];
+    [webView addObserver:self forKeyPath:@"loading" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld context:nil];
+    [webView addObserver:self forKeyPath:@"canGoBack" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld context:nil];
+    [webView addObserver:self forKeyPath:@"canGoForward" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld context:nil];
+    [webView addObserver:self forKeyPath:@"URL" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld context:nil];
+    [webView addObserver:self forKeyPath:@"title" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld context:nil];
 }
 
 - (void)removeObserversForWebView:(WKWebView *)webView {
@@ -259,6 +261,43 @@
     [_tabToolbar updateState:@(YES) forIndex:2];
 }
 
+- (void)showOthers {
+    BrowserModuleConfig *config = [BrowserModuleConfig sharedInstance];
+
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"" message:@"其他功能" preferredStyle:UIAlertControllerStyleActionSheet];
+    
+    UIAlertAction *action_0 = [UIAlertAction actionWithTitle:@"下载管理" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        DownloadListViewController *next = [DownloadListViewController new];
+        [self.navigationController pushViewController:next animated:YES];
+    }];
+    [alert addAction:action_0];
+    
+    UIAlertAction *action_1 = [UIAlertAction actionWithTitle:config.isNight?@"日间模式":@"夜间模式" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [BrowserModuleConfig sharedInstance].isNight = ![BrowserModuleConfig sharedInstance].isNight;
+    }];
+    [alert addAction:action_1];
+
+    UIAlertAction *action_2 = [UIAlertAction actionWithTitle:config.isFullScreenViewer?@"关闭全屏浏览":@"开启全屏浏览" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [BrowserModuleConfig sharedInstance].isFullScreenViewer = ![BrowserModuleConfig sharedInstance].isFullScreenViewer;
+    }];
+    [alert addAction:action_2];
+
+    UIAlertAction *action_3 = [UIAlertAction actionWithTitle:config.isNoPicture?@"关闭无图模式":@"开启无图模式" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [BrowserModuleConfig sharedInstance].isNoPicture = ![BrowserModuleConfig sharedInstance].isNoPicture;
+    }];
+    [alert addAction:action_3];
+    
+    UIAlertAction *action_4 = [UIAlertAction actionWithTitle:config.isQuickness?@"关闭急速模式":@"开启急速模式" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [BrowserModuleConfig sharedInstance].isQuickness = ![BrowserModuleConfig sharedInstance].isQuickness;
+    }];
+    [alert addAction:action_4];
+
+    UIAlertAction *cancel = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil];
+    [alert addAction:cancel];
+
+    [self presentViewController:alert animated:YES completion:nil];
+}
+
 
 #pragma mark - KVO for WKWebView
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context {
@@ -270,9 +309,15 @@
         [_tabToolbar updateState:change[NSKeyValueChangeNewKey] forIndex:2];
     }
     else if ([keyPath isEqualToString:@"canGoBack"]) {//在首页是不能返回，其他都能返回
+        
     }
     else if ([keyPath isEqualToString:@"canGoForward"]) {
-        [_tabToolbar updateState:change[NSKeyValueChangeNewKey] forIndex:1];
+        if (!change[NSKeyValueChangeNewKey]) {
+            [_tabToolbar updateState:change[NSKeyValueChangeOldKey] forIndex:1];
+        }
+        else {
+            [_tabToolbar updateState:change[NSKeyValueChangeNewKey] forIndex:1];
+        }
     }
     else if ([keyPath isEqualToString:@"URL"]) {
         _urlInputView.currentURL = change[NSKeyValueChangeNewKey];
@@ -367,10 +412,8 @@
         }
         [self removeObserversForWebView:_tabManager.selectTab.webView];
     }
-    else {//首页
-        if (_abilityVC.view.isHidden == YES) {
-            [self backToHome];
-        }
+    else {//
+        [self showOthers];
     }
 }
 
