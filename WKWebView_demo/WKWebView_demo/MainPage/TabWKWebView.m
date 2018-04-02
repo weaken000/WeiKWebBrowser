@@ -11,11 +11,9 @@
 @implementation TabWKWebView
 
 - (WKNavigation *)goBack {
-    
     if ([self.tabWebViewDelegate respondsToSelector:@selector(tabWebViewWillBack:)]) {
         [self.tabWebViewDelegate tabWebViewWillBack:self];
     }
-    
     return [super goBack];
 }
 - (WKNavigation *)goForward {

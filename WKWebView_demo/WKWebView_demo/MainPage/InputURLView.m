@@ -36,6 +36,12 @@
 
 - (void)setCurrentURL:(NSURL *)currentURL {
     _currentURL = currentURL;
+    if (!currentURL) {
+        _normalURLLab.text = @"";
+        _urlTextField.text = @"";
+        return;
+    }
+    
     if (currentURL.resourceSpecifier.length <= 2 || !currentURL.resourceSpecifier.length) {
         _normalURLLab.text = currentURL.absoluteString;
     }

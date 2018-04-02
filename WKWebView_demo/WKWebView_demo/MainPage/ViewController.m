@@ -13,6 +13,8 @@
 
 #import "TabManager.h"
 #import "Tab.h"
+#import "DataBaseHelper.h"
+#import "BrowsedModel.h"
 
 #import "TabViewController.h"
 #import "PageTabViewController.h"
@@ -36,6 +38,7 @@
 @implementation ViewController {
 
     CGFloat _toolbarOffsetY;
+    NSString *_lastTitle;
     
     UIView *_header;
     UIView *_footer;
@@ -43,8 +46,6 @@
     UIView *_container;
     InputURLView *_urlInputView;
 
-    
-    NSString *_lastTitle;
     TabManager *_tabManager;
 }
 
@@ -87,7 +88,7 @@
     _urlInputView = [[InputURLView alloc] initWithFrame:CGRectZero];
     _urlInputView.delegate = self;
     [_header addSubview:_urlInputView];
-    _tabToolbar = [[TabToolbar alloc] initWithFrame:CGRectZero titles:@[@"后退", @"前进", @"刷新", @"分页", @"历史"]];
+    _tabToolbar = [[TabToolbar alloc] initWithFrame:CGRectZero titles:@[@"后退", @"前进", @"刷新", @"分页", @"首页"]];
     _tabToolbar.delegate = self;
     _tabToolbar.backgroundColor = [UIColor whiteColor];
     [_footer addSubview:_tabToolbar];
@@ -134,7 +135,6 @@
         make.height.mas_equalTo(1);
     }];
     
-    
     Tab *tab = [_tabManager createTab];
     _tabManager.selectTab = tab;
     tab.webView.hidden = YES;
@@ -143,6 +143,12 @@
     [tab.webView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.edges.mas_equalTo(UIEdgeInsetsZero);
     }];
+    
+//    [DataBaseHelper selectBrowsedWhereCondition:@"where type = 1" complete:^(BOOL success, NSArray *array) {
+//        if (success && array.count) {
+//
+//        }
+//    }];
 }
 
 - (void)addObserversForWebView:(WKWebView *)webView {
@@ -214,6 +220,8 @@
     }
     NSURLRequest *request = [NSURLRequest requestWithURL:url];
     [_tabManager.selectTab.webView loadRequest:request];
+    
+    [_tabToolbar updateState:@(YES) forIndex:0];
 }
 
 - (void)showTab:(Tab *)tab {
@@ -224,6 +232,7 @@
             make.edges.mas_equalTo(UIEdgeInsetsZero);
         }];
         _tabManager.selectTab = tab;
+        [self addObserversForWebView:tab.webView];
     }
     _urlInputView.currentURL = tab.webView.URL;
     if (!tab.webView.backForwardList.currentItem) {
@@ -234,9 +243,22 @@
     else {
         tab.webView.hidden = NO;
         [_abilityVC abilityHidden:YES];
+        [_tabToolbar updateState:@([tab.webView canGoForward]) forIndex:1];
+        [_tabToolbar updateState:@(YES) forIndex:0];
+        [_tabToolbar updateState:@(NO) forIndex:2];
     }
-    [self addObserversForWebView:tab.webView];
+   
 }
+
+- (void)backToHome {
+    _abilityVC.view.hidden = NO;
+    _tabManager.selectTab.webView.hidden = YES;
+    _urlInputView.currentURL = nil;
+    [_tabToolbar updateState:@(YES) forIndex:1];
+    [_tabToolbar updateState:@(NO) forIndex:0];
+    [_tabToolbar updateState:@(YES) forIndex:2];
+}
+
 
 #pragma mark - KVO for WKWebView
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context {
@@ -247,13 +269,10 @@
     else if ([keyPath isEqualToString:@"loading"]) {
         [_tabToolbar updateState:change[NSKeyValueChangeNewKey] forIndex:2];
     }
-    else if ([keyPath isEqualToString:@"canGoBack"]) {
-        [_tabToolbar updateState:change[NSKeyValueChangeNewKey] forIndex:0];
-
+    else if ([keyPath isEqualToString:@"canGoBack"]) {//在首页是不能返回，其他都能返回
     }
     else if ([keyPath isEqualToString:@"canGoForward"]) {
         [_tabToolbar updateState:change[NSKeyValueChangeNewKey] forIndex:1];
-
     }
     else if ([keyPath isEqualToString:@"URL"]) {
         _urlInputView.currentURL = change[NSKeyValueChangeNewKey];
@@ -316,10 +335,20 @@
 #pragma mark - TabToolbarDelegate
 - (void)toolbar:(TabToolbar *)toolBar pressIndex:(NSInteger)index {
     if (index == 0) {
-        [_tabManager.selectTab.webView goBack];
+        if ([_tabManager.selectTab.webView canGoBack]) {
+            [_tabManager.selectTab.webView goBack];
+        }
+        else {//返回到首页
+            [self backToHome];
+        }
     }
     else if (index == 1) {
-        [_tabManager.selectTab.webView goForward];
+        if (_abilityVC.view.hidden == NO && _tabManager.selectTab.webView.backForwardList.currentItem) {
+            [self showTab:_tabManager.selectTab];
+        }
+        else {
+            [_tabManager.selectTab.webView goForward];
+        }
     }
     else if (index == 2) {
         [_tabManager.selectTab.webView reload];
@@ -338,8 +367,10 @@
         }
         [self removeObserversForWebView:_tabManager.selectTab.webView];
     }
-    else {
-        
+    else {//首页
+        if (_abilityVC.view.isHidden == YES) {
+            [self backToHome];
+        }
     }
 }
 

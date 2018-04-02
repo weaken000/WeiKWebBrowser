@@ -24,8 +24,7 @@ static pthread_mutex_t pLock;
 @property (nonatomic, strong) NSMutableArray *historyCacheArray;
 
 @property (nonatomic, strong) NSMutableArray *collectArray;
-//直接添加历史记录， 默认在请求完成后直接添加
-@property (nonatomic, assign) BOOL isSimpleAddHistory;
+
 
 @end
 
@@ -43,7 +42,6 @@ static pthread_mutex_t pLock;
     self = [super init];
     if (self) {
         _lastTitle = @"";
-        _isSimpleAddHistory = YES;
         _historyCacheArray = [NSMutableArray array];
         _collectArray = [NSMutableArray array];
         [DataBaseHelper selectBrowsedWhereCondition:@"where type = 2" complete:^(BOOL success, NSArray *array) {
