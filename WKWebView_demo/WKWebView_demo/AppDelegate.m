@@ -10,6 +10,9 @@
 
 #import "DataBaseHelper.h"
 #import "BrowsedModel.h"
+#import "CustomURLProtocol.h"
+#import "NSURLProtocol+WebKitSupport.h"
+#import "BrowserModuleConfig.h"
 
 @interface AppDelegate ()
 
@@ -25,6 +28,17 @@
 //    [DataBaseHelper deleteBrowsedWhereCondition:@"where type = 3" complete:^(BOOL success) {
 //
 //    }];
+    
+
+    if ([BrowserModuleConfig sharedInstance].isNoPicture) {
+        [NSURLProtocol wk_registerScheme:@"http"];
+        [NSURLProtocol wk_registerScheme:@"https"];
+    }
+    else {
+        [NSURLProtocol wk_unregisterScheme:@"http"];
+        [NSURLProtocol wk_unregisterScheme:@"https"];
+    }
+    [NSURLProtocol registerClass:[CustomURLProtocol class]];
     
     return YES;
 }

@@ -27,6 +27,7 @@
 		4C81B5A320637E540083F209 /* UIButton+WebCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C81B59420637E540083F209 /* UIButton+WebCache.m */; };
 		4C81B5A6206390AE0083F209 /* WKMessageHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C81B5A5206390AE0083F209 /* WKMessageHandler.m */; };
 		4C947C5B206E052E0023C5E4 /* TabWKWebView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C947C5A206E052E0023C5E4 /* TabWKWebView.m */; };
+		4CA3B1B320734DA60066ED96 /* DownloadCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CA3B1B220734DA60066ED96 /* DownloadCell.m */; };
 		4CA978F22064E3450094EEF3 /* TabViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CA978F12064E3450094EEF3 /* TabViewController.m */; };
 		4CAA54EF206C809900176822 /* NSURL+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CAA54EE206C809800176822 /* NSURL+Extension.m */; };
 		4CAA54F3206C860D00176822 /* WebViewTranstion.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CAA54F2206C860D00176822 /* WebViewTranstion.m */; };
@@ -79,6 +80,8 @@
 		4CD1869C2061FF5100AD697D /* WKWebView_demoUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CD1869B2061FF5100AD697D /* WKWebView_demoUITests.m */; };
 		4CD186AB206200E600AD697D /* TabToolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CD186AA206200E600AD697D /* TabToolbar.m */; };
 		4CD186AE2062475200AD697D /* GradientProgressBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CD186AD2062475200AD697D /* GradientProgressBar.m */; };
+		4CD20D6D2073747400EC413A /* CustomURLProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CD20D6C2073747400EC413A /* CustomURLProtocol.m */; };
+		4CD20D702073782700EC413A /* NSURLProtocol+WebKitSupport.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CD20D6F2073782600EC413A /* NSURLProtocol+WebKitSupport.m */; };
 		4CE6819D20649BA200881CB5 /* TabManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CE6819C20649BA200881CB5 /* TabManager.m */; };
 		4CE681A020649BAD00881CB5 /* Tab.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CE6819F20649BAD00881CB5 /* Tab.m */; };
 		4CE681A62064A2FF00881CB5 /* WebViewCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CE681A52064A2FF00881CB5 /* WebViewCollectionViewCell.m */; };
@@ -142,6 +145,8 @@
 		4C81B5A5206390AE0083F209 /* WKMessageHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WKMessageHandler.m; sourceTree = "<group>"; };
 		4C947C59206E052E0023C5E4 /* TabWKWebView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TabWKWebView.h; sourceTree = "<group>"; };
 		4C947C5A206E052E0023C5E4 /* TabWKWebView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TabWKWebView.m; sourceTree = "<group>"; };
+		4CA3B1B120734DA60066ED96 /* DownloadCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DownloadCell.h; sourceTree = "<group>"; };
+		4CA3B1B220734DA60066ED96 /* DownloadCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DownloadCell.m; sourceTree = "<group>"; };
 		4CA978F02064E3440094EEF3 /* TabViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TabViewController.h; sourceTree = "<group>"; };
 		4CA978F12064E3450094EEF3 /* TabViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TabViewController.m; sourceTree = "<group>"; };
 		4CAA54ED206C809800176822 /* NSURL+Extension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSURL+Extension.h"; sourceTree = "<group>"; };
@@ -253,6 +258,10 @@
 		4CD186AA206200E600AD697D /* TabToolbar.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TabToolbar.m; sourceTree = "<group>"; };
 		4CD186AC2062475200AD697D /* GradientProgressBar.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GradientProgressBar.h; sourceTree = "<group>"; };
 		4CD186AD2062475200AD697D /* GradientProgressBar.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GradientProgressBar.m; sourceTree = "<group>"; };
+		4CD20D6B2073747400EC413A /* CustomURLProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CustomURLProtocol.h; sourceTree = "<group>"; };
+		4CD20D6C2073747400EC413A /* CustomURLProtocol.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CustomURLProtocol.m; sourceTree = "<group>"; };
+		4CD20D6E2073782600EC413A /* NSURLProtocol+WebKitSupport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSURLProtocol+WebKitSupport.h"; sourceTree = "<group>"; };
+		4CD20D6F2073782600EC413A /* NSURLProtocol+WebKitSupport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSURLProtocol+WebKitSupport.m"; sourceTree = "<group>"; };
 		4CE6819B20649BA200881CB5 /* TabManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TabManager.h; sourceTree = "<group>"; };
 		4CE6819C20649BA200881CB5 /* TabManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TabManager.m; sourceTree = "<group>"; };
 		4CE6819E20649BAD00881CB5 /* Tab.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Tab.h; sourceTree = "<group>"; };
@@ -477,6 +486,8 @@
 				4CAF9051207214810067E3F1 /* DownloadListViewController.m */,
 				4CAF90322071D3120067E3F1 /* BrowserModuleConfig.h */,
 				4CAF90332071D3120067E3F1 /* BrowserModuleConfig.m */,
+				4CA3B1B120734DA60066ED96 /* DownloadCell.h */,
+				4CA3B1B220734DA60066ED96 /* DownloadCell.m */,
 			);
 			path = module;
 			sourceTree = "<group>";
@@ -537,6 +548,7 @@
 		4CD186762061FF5000AD697D /* WKWebView_demo */ = {
 			isa = PBXGroup;
 			children = (
+				4CD20D6A2073744E00EC413A /* WKURLProtocol */,
 				4CAF90492071DE9C0067E3F1 /* WKDownLoad */,
 				4CAF902E2071CEF00067E3F1 /* module */,
 				4CADFD50206B6B2200F74098 /* 功能视图 */,
@@ -577,6 +589,17 @@
 				4CD1869D2061FF5100AD697D /* Info.plist */,
 			);
 			path = WKWebView_demoUITests;
+			sourceTree = "<group>";
+		};
+		4CD20D6A2073744E00EC413A /* WKURLProtocol */ = {
+			isa = PBXGroup;
+			children = (
+				4CD20D6E2073782600EC413A /* NSURLProtocol+WebKitSupport.h */,
+				4CD20D6F2073782600EC413A /* NSURLProtocol+WebKitSupport.m */,
+				4CD20D6B2073747400EC413A /* CustomURLProtocol.h */,
+				4CD20D6C2073747400EC413A /* CustomURLProtocol.m */,
+			);
+			path = WKURLProtocol;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -717,6 +740,8 @@
 				4C0E1A01206B3AFF00A3F57A /* BaseNavigationController.m in Sources */,
 				4C81B59A20637E540083F209 /* UIImage+GIF.m in Sources */,
 				4C81B59D20637E540083F209 /* SDWebImagePrefetcher.m in Sources */,
+				4CD20D702073782700EC413A /* NSURLProtocol+WebKitSupport.m in Sources */,
+				4CD20D6D2073747400EC413A /* CustomURLProtocol.m in Sources */,
 				4C81B5A120637E540083F209 /* UIImageView+WebCache.m in Sources */,
 				4CADFD61206B781700F74098 /* AbilityTypeCollectView.m in Sources */,
 				4CAA54F3206C860D00176822 /* WebViewTranstion.m in Sources */,
@@ -742,6 +767,7 @@
 				4CE681A62064A2FF00881CB5 /* WebViewCollectionViewCell.m in Sources */,
 				4CA978F22064E3450094EEF3 /* TabViewController.m in Sources */,
 				4CE6819D20649BA200881CB5 /* TabManager.m in Sources */,
+				4CA3B1B320734DA60066ED96 /* DownloadCell.m in Sources */,
 				4C81B59920637E540083F209 /* SDWebImageDownloader.m in Sources */,
 				4C81B59620637E540083F209 /* SDWebImageManager.m in Sources */,
 				4CADFD46206B47EB00F74098 /* NSArray+MASAdditions.m in Sources */,

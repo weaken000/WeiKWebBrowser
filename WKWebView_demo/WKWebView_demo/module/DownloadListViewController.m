@@ -8,6 +8,7 @@
 
 #import "DownloadListViewController.h"
 #import "WKDownloadManager.h"
+#import "DownloadCell.h"
 
 @interface DownloadListViewController ()<UITableViewDataSource, UITableViewDelegate>
 
@@ -22,19 +23,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    [[WKDownloadManager defaultManager] clearCache];
-    
-//    _urls = @[@"https://github.com/ReactiveX/RxJava.git",
-//              @"https://github.com/TextureGroup/Texture.git",
-//              @"https://github.com/realm/realm-cocoa.git"];
-    
-    _urls = @[
-              @"https://images.unsplash.com/photo-1496361328949-40f91ca2fcef?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=01faa5d3f58a7b5999a664d2303a4815&auto=format&fit=crop&w=634&q=80",
-              @"https://images.unsplash.com/photo-1516046827393-be7eb3d379b9?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=71a7e1ba58dfd30bf682b7fc2fed6a19&auto=format&fit=crop&w=1301&q=80",
-              @"https://images.unsplash.com/photo-1522093243371-296c79a66df4?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=c5df6bb1f7e73b7621f64a4da294fea0&auto=format&fit=crop&w=700&q=80",
-              @"https://images.unsplash.com/photo-1507506892840-60a3825a6161?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=ceb21ff26d5ac8c78b87a9f569e90712&auto=format&fit=crop&w=634&q=80",
-              @"https://images.unsplash.com/photo-1514234827276-c4504accd778?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=b06e09a12ce1ef9f02c99d9ec9255fc5&auto=format&fit=crop&w=634&q=80",
-              @"https://images.unsplash.com/photo-1516598212795-27ca49821c62?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=f5802f71f8c02cc75836acf5deab1736&auto=format&fit=crop&w=634&q=80"];
+//    [[WKDownloadManager defaultManager] clearCache];
     
     [self initSubviews];
 
@@ -44,22 +33,28 @@
     [self.navigationController setNavigationBarHidden:NO animated:animated];
 }
 
+- (void)viewDidAppear:(BOOL)animated {
+    _urls = @[@"http://pic.ibaotu.com/00/26/72/06H888piCkJ3.mp4",
+              @"http://pic.ibaotu.com/00/17/19/92n888piCEPp.mp4",
+              @"http://pic.ibaotu.com/00/42/44/41x888piCftb.mp4",
+              @"http://pic.ibaotu.com/00/38/81/22i888piCkMW.mp4",
+              @"http://pic.ibaotu.com/00/54/50/118888piCMJe.mp4",
+              @"http://pic.ibaotu.com/00/17/04/29q888piCuVi.mp4",
+              @"http://pic.ibaotu.com/00/28/78/92q888piCpKU.mp4",
+              @"http://bpic.wotucdn.com/27/30/59/2758picOOOPIC3c.mp4",
+              @"http://mp4.vjshi.com/2017-08-03/c8d1f344e6f3d87fdf720d0eb48276b3.mp4",
+              @"http://mp4.vjshi.com/2016-06-24/8106b276ba0348e19ec8fe925696db2b.mp4"];
+    
+    [self.tableView reloadData];
+}
+
 - (void)initSubviews {
     _tableView = [[UITableView alloc] initWithFrame:self.view.bounds];;
     _tableView.delegate = self;
     _tableView.dataSource = self;
+    _tableView.rowHeight = 80;
     _tableView.tableFooterView = [UIView new];
     [self.view addSubview:_tableView];
-    
-    for (NSString *url in _urls) {
-        [[WKDownloadManager defaultManager] downloadFileWithURL:url progress:^(NSProgress *progress, WKDownloadReceipt *receipt) {
-            NSLog(@"| ---- %@: %@  ----|\n", receipt.url, [progress valueForKey:@"fractionCompleted"]);
-        } success:^(NSURLRequest *request, NSHTTPURLResponse *response, NSURL *url) {
-            //NSLog(@"success:| ----  %@: %@  ----|\n", url.absoluteString, response);
-        } failure:^(NSURLRequest *request, NSHTTPURLResponse *response, NSError *error) {
-            //NSLog(@"failure:| ----  %@: %@  ----|\n", url, error.description);
-        }];
-    }
     
 }
 
@@ -68,12 +63,17 @@
     return _urls.count;
 }
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"cell"];
+    DownloadCell *cell = [tableView dequeueReusableCellWithIdentifier:@"cell"];
     if (!cell) {
-        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"cell"];
-        cell.selectionStyle = UITableViewCellSelectionStyleNone;
+        cell = [[DownloadCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"cell"];
     }
+    NSString *url = _urls[indexPath.row];
+    cell.url = url;
     return cell;
+}
+
+- (void)dealloc {
+    NSLog(@"%@ dealloc", [self class]);
 }
 
 @end

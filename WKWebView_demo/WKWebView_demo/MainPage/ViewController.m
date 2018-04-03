@@ -16,6 +16,7 @@
 #import "DataBaseHelper.h"
 #import "BrowsedModel.h"
 #import "BrowserModuleConfig.h"
+#import "NSURLProtocol+WebKitSupport.h"
 
 #import "TabViewController.h"
 #import "PageTabViewController.h"
@@ -284,6 +285,16 @@
 
     UIAlertAction *action_3 = [UIAlertAction actionWithTitle:config.isNoPicture?@"关闭无图模式":@"开启无图模式" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         [BrowserModuleConfig sharedInstance].isNoPicture = ![BrowserModuleConfig sharedInstance].isNoPicture;
+        
+        if ([BrowserModuleConfig sharedInstance].isNoPicture) {
+            [NSURLProtocol wk_registerScheme:@"http"];
+            [NSURLProtocol wk_registerScheme:@"https"];
+        }
+        else {
+            [NSURLProtocol wk_unregisterScheme:@"http"];
+            [NSURLProtocol wk_unregisterScheme:@"https"];
+        }
+        
     }];
     [alert addAction:action_3];
     

@@ -25,6 +25,14 @@ typedef NS_ENUM(NSInteger, WKDownloadPrioritization) {
     WKDownloadPrioritizationLIFO   /** last in first out */
 };
 
+@class WKDownloadReceipt;
+
+@protocol WKDownloadReceiptDelegate <NSObject>
+
+- (void)receipt:(WKDownloadReceipt *)receipt didChangedState:(WKDownloadState)state;
+
+@end
+
 @interface WKDownloadReceipt : NSObject
 
 @property (nonatomic, copy  , readonly) NSString *url;
@@ -39,6 +47,7 @@ typedef NS_ENUM(NSInteger, WKDownloadPrioritization) {
 @property (nonatomic, strong, readonly) NSOutputStream *stream;
 @property (nonatomic, copy  , readonly) NSProgress *progress;
 
+@property (nonatomic, weak) id<WKDownloadReceiptDelegate> receiptDelegate;
 
 @end
 
@@ -56,6 +65,10 @@ typedef NS_ENUM(NSInteger, WKDownloadPrioritization) {
                                    success:(void(^)(NSURLRequest *request, NSHTTPURLResponse *response, NSURL *url))success
                                    failure:(void(^)(NSURLRequest *request, NSHTTPURLResponse *response,  NSError *error))failure;
 
+
+- (WKDownloadReceipt *)receiptForURL:(NSString *)url;
+
+- (void)suspendAll;
 
 - (void)resumeWithURL:(NSString *)url;
 - (void)resumeWithReceipt:(WKDownloadReceipt *)receipt;

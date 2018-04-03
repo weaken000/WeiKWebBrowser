@@ -8,6 +8,7 @@
 
 #import "WKDownloadManager.h"
 #import <CommonCrypto/CommonDigest.h>
+#import <UIKit/UIKit.h>
 
 #pragma mark - ********** define ***********
 NSString * const WKDownloadCacheFolderName = @"WKDownloadCache";
@@ -158,6 +159,17 @@ typedef void (^progressBlock)(NSProgress * _Nonnull, WKDownloadReceipt *);
     return self;
 }
 
+- (void)setState:(WKDownloadState)state {
+    [self willChangeValueForKey:@"state"];
+    _state = state;
+    if ([self.receiptDelegate respondsToSelector:@selector(receipt:didChangedState:)]) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.receiptDelegate receipt:self didChangedState:state];
+        });
+    }
+    [self didChangeValueForKey:@"state"];
+}
+
 #pragma mark - NSCoding
 - (void)encodeWithCoder:(NSCoder *)aCoder {
     [aCoder encodeObject:self.url forKey:NSStringFromSelector(@selector(url))];
@@ -194,7 +206,7 @@ typedef void (^progressBlock)(NSProgress * _Nonnull, WKDownloadReceipt *);
 //已经进入下载的task
 @property (nonatomic, strong) NSMutableDictionary *activityTasks;
 //等待序列
-@property (nonatomic, strong) NSMutableArray<WKDownloadReceipt *> *queuedTasks;
+@property (nonatomic, strong) NSMutableArray<WKDownloadReceipt *> *queuedReceipt;
 //所有下载记录历史
 @property (nonatomic, strong) NSMutableArray<WKDownloadReceipt *> *allDownloadReceipts;
 
@@ -237,16 +249,25 @@ typedef void (^progressBlock)(NSProgress * _Nonnull, WKDownloadReceipt *);
 
 - (instancetype)initWithURLSession:(NSURLSession *)session downloadPrioritization:(WKDownloadPrioritization)prioritization maxActivityRequestCount:(NSUInteger)count {
     if (self == [super init]) {
+        
+        
+        
         _session = session;
         _maxActivityReqeustCount = count;
         _activeRequestCount = 0;
         _downloadPrioritization = prioritization;
         
+        (void)self.allDownloadReceipts;
         _activityTasks = [NSMutableDictionary dictionary];
-        _queuedTasks = [NSMutableArray array];
+        _queuedReceipt = [NSMutableArray array];
         
         NSString *name = @"com.wk.downloadManager.synchronizationqueue-%@";
         _synchronizationQueue = dispatch_queue_create([name cStringUsingEncoding:NSASCIIStringEncoding], DISPATCH_QUEUE_SERIAL);
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:UIApplicationWillTerminateNotification object:nil];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidReceiveMemoryWarning:) name:UIApplicationDidReceiveMemoryWarningNotification object:nil];
+        
     }
     return self;
 }
@@ -256,8 +277,17 @@ typedef void (^progressBlock)(NSProgress * _Nonnull, WKDownloadReceipt *);
     if (!_allDownloadReceipts) {
         NSArray *receipts = [NSKeyedUnarchiver unarchiveObjectWithFile:LocalReceiptsPath()];
         _allDownloadReceipts = receipts != nil ? receipts.mutableCopy : [NSMutableArray array];
+        [_queuedReceipt addObjectsFromArray:_allDownloadReceipts];
     }
     return _allDownloadReceipts;
+}
+
+#pragma mark - Notification
+- (void)applicationWillTerminate:(NSNotification *)noti {
+    [self suspendAll];
+}
+- (void)applicationDidReceiveMemoryWarning:(NSNotification *)noti {
+    [self suspendAll];
 }
 
 #pragma mark - Private
@@ -284,6 +314,35 @@ typedef void (^progressBlock)(NSProgress * _Nonnull, WKDownloadReceipt *);
     return receipt;
 }
 
+- (void)safelyStartNextReceipt {
+    
+    dispatch_async(self.synchronizationQueue, ^{
+  
+        [self saveAllDownloadReceipts:self.allDownloadReceipts];
+        if (self.activeRequestCount > 0) {
+            self.activeRequestCount--;
+        }
+        
+        if (!self.queuedReceipt.count) {
+            return;
+        }
+        
+        NSInteger i = 0;
+        while ([self isActivityRequestCountBelowMaxCount] && i <= self.queuedReceipt.count-1) {
+            WKDownloadReceipt *nextReceipt = self.queuedReceipt[i];
+            i++;
+            if (nextReceipt.state == WKDownloadStateWillResume) {
+                [self downloadFileWithURL:nextReceipt.url
+                                 progress:nextReceipt.progressBlock
+                                  success:nextReceipt.successBlock
+                                  failure:nextReceipt.failureBlock];
+            }
+            else {
+                continue;
+            }
+        }
+    });
+}
 
 #pragma mark - Public Load
 //两种情况，一种是调用resume发现已经在队列中，但还没有开始下载另外一种是根本不存在改下载任务
@@ -291,6 +350,7 @@ typedef void (^progressBlock)(NSProgress * _Nonnull, WKDownloadReceipt *);
                                   progress:(void (^)(NSProgress *, WKDownloadReceipt *))progress
                                    success:(void (^)(NSURLRequest *, NSHTTPURLResponse *, NSURL *))success
                                    failure:(void (^)(NSURLRequest *, NSHTTPURLResponse *, NSError *))failure {
+    
     
     WKDownloadReceipt *receipt = [self receiptForURL:url];
     if (!receipt) {
@@ -300,66 +360,69 @@ typedef void (^progressBlock)(NSProgress * _Nonnull, WKDownloadReceipt *);
     receipt.progressBlock = progress;
     receipt.failureBlock = failure;
     
-    dispatch_async(self.synchronizationQueue, ^{
-        
-        //如果已经存在，就需要及时返回当前对应的状态
-        if (receipt.state == WKDownloadStateFailed) {
-            receipt.failureBlock(nil, nil, receipt.error);
-            return;
-        }
-        if (receipt.state == WKDownloadStateCompleted && receipt.totalBytesWritten == receipt.totalBytesExpectedToWrite) {
-            receipt.successBlock(nil, nil, [NSURL URLWithString:receipt.url]);
-            return;
-        }
-        
-        if (receipt.state != WKDownloadStateNone) {
-            receipt.progressBlock(receipt.progress, receipt);
-        }
-        
-        
-        /*
-         下载规则：调用当前方法时，不代表立即开始下载，只是确认添加到下载历史中，同时如果之前已经有过下载记录（根据url判断，新建的receipt的state为WKDownloadStateNone），则需要返回之前的下载记录，不再重新开启task下载
-         如果当前未到达同时下载最大数量时，加入活动字典中并且马上开始下载，，
-         如果已经到达最大数量，不做操作.
-         根据下载策略(FIFO、FILO)加入等待下载的数组中
-         **/
-        
-        if ([self isActivityRequestCountBelowMaxCount]) {
-            receipt.state = WKDownloadStateDownloading;
-            NSURLSessionDataTask *task = _activityTasks[receipt.url];
-            if (!task) {
-                NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:receipt.url]];
-                request.HTTPMethod = @"GET";
-                NSString *range = [NSString stringWithFormat:@"bytes=%zd-", receipt.totalBytesWritten];
-                [request setValue:range forHTTPHeaderField:@"Range"];
-                task = [self.session dataTaskWithRequest:request];
-                task.taskDescription = receipt.url;
-                self.activityTasks[receipt.url] = task;
+    
+    //如果已经存在，就需要及时返回当前对应的状态
+    if (receipt.state == WKDownloadStateFailed) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (receipt.failureBlock) {
+                receipt.failureBlock(nil, nil, receipt.error);
             }
-            [task resume];
-            self.activeRequestCount++;
+        });
+        return receipt;
+    }
+    if (receipt.state == WKDownloadStateCompleted) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            receipt.successBlock(nil, nil, [NSURL URLWithString:receipt.url]);
+        });
+        return receipt;
+    }
+    
+    if (receipt.state == WKDownloadStateSuspened
+        || receipt.state == WKDownloadStateDownloading) {//暂停状态或者正在下载中，不能直接开始下载
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (receipt.progressBlock) {
+                receipt.progressBlock(receipt.progress, receipt);
+            }
+        });
+        return receipt;
+    }
+
+    //剩余状态：等待开始、初始状态
+    if ([self isActivityRequestCountBelowMaxCount]) {
+        //未达到最大下载数
+        NSURLSessionDataTask *task = _activityTasks[receipt.url];
+        if (!task) {
+            NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:receipt.url]];
+            request.HTTPMethod = @"GET";
+            NSString *range = [NSString stringWithFormat:@"bytes=%zd-", receipt.totalBytesWritten];
+            [request setValue:range forHTTPHeaderField:@"Range"];
+            task = [self.session dataTaskWithRequest:request];
+            task.taskDescription = receipt.url;
+            self.activityTasks[receipt.url] = task;
+        }
+        [task resume];
+        self.activeRequestCount++;
+    }
+    else {
+        //到达下载最大数，进入等待状态
+        receipt.state = WKDownloadStateWillResume;
+    }
+    
+    //加入下载序列
+    if (![self.queuedReceipt containsObject:receipt]) {
+        if (self.downloadPrioritization == WKDownloadPrioritizationFIFO) {
+            [self.queuedReceipt addObject:receipt];
         }
         else {
-            receipt.state = WKDownloadStateWillResume;
+            [self.queuedReceipt insertObject:receipt atIndex:0];
         }
-        
-        //加入下载序列
-        if (![self.queuedTasks containsObject:receipt]) {
-            if (self.downloadPrioritization == WKDownloadPrioritizationFIFO) {
-                [self.queuedTasks addObject:receipt];
-            }
-            else {
-                [self.queuedTasks insertObject:receipt atIndex:0];
-            }
-        }
-        
-        //添加记录
-        if (![self.allDownloadReceipts containsObject:receipt]) {
-            [self.allDownloadReceipts addObject:receipt];
-            [self saveAllDownloadReceipts:self.allDownloadReceipts];
-        }
-        
-    });
+    }
+    
+    //添加记录
+    if (![self.allDownloadReceipts containsObject:receipt]) {
+        [self.allDownloadReceipts addObject:receipt];
+    }
+    [self saveAllDownloadReceipts:self.allDownloadReceipts];
     
     return receipt;
 }
@@ -367,9 +430,27 @@ typedef void (^progressBlock)(NSProgress * _Nonnull, WKDownloadReceipt *);
 - (void)clearCache {
     NSFileManager *fileManager = [NSFileManager defaultManager];
     [fileManager removeItemAtPath:cacheFolder() error:nil];
+    [fileManager removeItemAtPath:LocalReceiptsPath() error:nil];
+    
+    [_allDownloadReceipts removeAllObjects];
+    [_queuedReceipt removeAllObjects];
+    [_activityTasks removeAllObjects];
 }
 
 #pragma mark - Public Action
+- (void)suspendAll {
+    dispatch_async(self.synchronizationQueue, ^{
+        for (WKDownloadReceipt *receipt in self.queuedReceipt) {
+            NSURLSessionDataTask *task = self.activityTasks[receipt.url];
+            if (task && receipt.state == WKDownloadStateDownloading) {
+                [task suspend];
+            }
+            receipt.state = WKDownloadStateSuspened;
+        }
+        [self saveAllDownloadReceipts:self.queuedReceipt];
+    });
+}
+
 - (void)resumeWithURL:(NSString *)url {
     WKDownloadReceipt *receipt = [self receiptForURL:url];
     [self resumeWithReceipt:receipt];
@@ -377,11 +458,36 @@ typedef void (^progressBlock)(NSProgress * _Nonnull, WKDownloadReceipt *);
 
 - (void)resumeWithReceipt:(WKDownloadReceipt *)receipt {
     if (!receipt) return;//说明当前模型已经存在所有记录中
-
-    if (![self isActivityRequestCountBelowMaxCount]) {//暂停一个任务
-        [self suspendWithURL:self.activityTasks.allKeys.firstObject];
-    }
-    [self downloadFileWithURL:receipt.url progress:receipt.progressBlock success:receipt.successBlock failure:receipt.failureBlock];
+    
+    dispatch_async(self.synchronizationQueue, ^{
+        
+        NSInteger i = self.queuedReceipt.count-1;
+        //暂停一个任务
+        while (![self isActivityRequestCountBelowMaxCount] && i >= 0) {
+            WKDownloadReceipt *tmpRe = self.queuedReceipt[i];
+            i--;
+            if ([tmpRe.url isEqualToString:receipt.url]) {
+                continue;
+            }
+            if (tmpRe.state == WKDownloadStateDownloading) {
+                self.activeRequestCount--;
+                NSURLSessionDataTask *task = self.activityTasks[tmpRe.url];
+                if (task) {
+                    [task suspend];
+                }
+                [self updateReceiptWithURL:tmpRe.url state:WKDownloadStateSuspened];
+                break;
+            }
+        }
+        
+        receipt.state = WKDownloadStateWillResume;
+        [self saveAllDownloadReceipts:self.allDownloadReceipts];
+        [self downloadFileWithURL:receipt.url
+                         progress:receipt.progressBlock
+                          success:receipt.successBlock
+                          failure:receipt.failureBlock];
+    });
+    
 }
 
 - (void)suspendWithURL:(NSString *)url {
@@ -390,15 +496,38 @@ typedef void (^progressBlock)(NSProgress * _Nonnull, WKDownloadReceipt *);
 }
 - (void)suspendWithReceipt:(WKDownloadReceipt *)receipt {
     if (!receipt) return;//已经存在任务队列中
-    if (!_activityTasks[receipt.url]) return;//任务还没有开始下载，无法暂停
     
-    NSURLSessionDataTask *task = _activityTasks[receipt.url];
-    if (receipt.state == WKDownloadStateDownloading) {
-        [task suspend];
-    }
-    
-    _activeRequestCount--;
-    [self updateReceiptWithURL:receipt.url state:WKDownloadStateSuspened];
+    dispatch_async(self.synchronizationQueue, ^{
+        
+        NSURLSessionDataTask *task = _activityTasks[receipt.url];
+        if (task && receipt.state == WKDownloadStateDownloading) {
+            if (self.activeRequestCount > 0) {
+                self.activeRequestCount--;
+            }
+            [task suspend];
+        }
+        [self updateReceiptWithURL:receipt.url state:WKDownloadStateSuspened];
+        
+        if (!self.queuedReceipt.count) {
+            return;
+        }
+        
+        NSInteger i = 0;
+        while ([self isActivityRequestCountBelowMaxCount] && i <= self.queuedReceipt.count-1) {
+            WKDownloadReceipt *nextReceipt = self.queuedReceipt[i];
+            i++;
+            if (nextReceipt.state == WKDownloadStateWillResume) {
+                [self downloadFileWithURL:nextReceipt.url
+                                 progress:nextReceipt.progressBlock
+                                  success:nextReceipt.successBlock
+                                  failure:nextReceipt.failureBlock];
+            }
+            else {
+                continue;
+            }
+        }
+        
+    });
 }
 
 - (void)removeWithURL:(NSString *)url {
@@ -408,19 +537,42 @@ typedef void (^progressBlock)(NSProgress * _Nonnull, WKDownloadReceipt *);
 - (void)removeWithReceipt:(WKDownloadReceipt *)receipt {
     if (!receipt) return;//存在任务队列中
     
-    NSURLSessionDataTask *task = _activityTasks[receipt.url];
-    if (task) {//已经开始下载，取消下载
-        [task cancel];
-        [_activityTasks removeObjectForKey:receipt.url];
-        _activeRequestCount--;
-    }
-    
-    [_queuedTasks removeObject:receipt];
-    [self.allDownloadReceipts removeObject:receipt];
-    [self saveAllDownloadReceipts:self.allDownloadReceipts];
-    
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    [fileManager removeItemAtPath:receipt.filePath error:nil];
+    dispatch_async(self.synchronizationQueue, ^{
+        NSURLSessionDataTask *task = _activityTasks[receipt.url];
+        if (task) {//已经开始下载，取消下载
+            [task cancel];
+            [self.activityTasks removeObjectForKey:receipt.url];
+        }
+        
+        [self.queuedReceipt removeObject:receipt];
+        [self.allDownloadReceipts removeObject:receipt];
+        [self saveAllDownloadReceipts:self.allDownloadReceipts];
+        NSFileManager *fileManager = [NSFileManager defaultManager];
+        [fileManager removeItemAtPath:receipt.filePath error:nil];
+        
+        if (self.activeRequestCount > 0 && receipt.state == WKDownloadStateDownloading) {
+            self.activeRequestCount--;
+        }
+        
+        if (!self.queuedReceipt.count) {
+            return;
+        }
+        
+        NSInteger i = 0;
+        while ([self isActivityRequestCountBelowMaxCount] && i <= self.queuedReceipt.count-1) {
+            WKDownloadReceipt *nextReceipt = self.queuedReceipt[i];
+            i++;
+            if (nextReceipt.state == WKDownloadStateWillResume) {
+                [self downloadFileWithURL:nextReceipt.url
+                                 progress:nextReceipt.progressBlock
+                                  success:nextReceipt.successBlock
+                                  failure:nextReceipt.failureBlock];
+            }
+            else {
+                continue;
+            }
+        }
+    });
 }
 
 
@@ -443,51 +595,49 @@ didReceiveResponse:(NSURLResponse *)response
 
 - (void)URLSession:(NSURLSession *)session dataTask:(NSURLSessionDataTask *)dataTask didReceiveData:(NSData *)data {
     
-    dispatch_async(self.synchronizationQueue, ^{
-        
-        __block NSError *error = nil;
-        WKDownloadReceipt *receipt = [self receiptForURL:dataTask.taskDescription];
-        NSInputStream *inputStream =  [[NSInputStream alloc] initWithData:data];
-        NSOutputStream *outputStream = [[NSOutputStream alloc] initWithURL:[NSURL fileURLWithPath:receipt.filePath] append:YES];
-        
-        [inputStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
-        [outputStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
-        
-        [inputStream open];
-        [outputStream open];
-        
-        while ([inputStream hasBytesAvailable] && [outputStream hasSpaceAvailable]) {
+    __block NSError *error = nil;
+    WKDownloadReceipt *receipt = [self receiptForURL:dataTask.taskDescription];
+    NSInputStream *inputStream =  [[NSInputStream alloc] initWithData:data];
+    NSOutputStream *outputStream = [[NSOutputStream alloc] initWithURL:[NSURL fileURLWithPath:receipt.filePath] append:YES];
     
-            uint8_t buffer[1024];
-            
-            NSInteger bytesRead = [inputStream read:buffer maxLength:1024];
-            if (inputStream.streamError || bytesRead < 0) {
-                error = inputStream.streamError;
-                break;
-            }
-            
-            NSInteger bytesWritten = [outputStream write:buffer maxLength:(NSUInteger)bytesRead];
-            if (outputStream.streamError || bytesWritten < 0) {
-                error = outputStream.streamError;
-                break;
-            }
-            
-            if (bytesRead == 0 && bytesWritten == 0) {
-                break;
-            }
+    [inputStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+    [outputStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+    
+    [inputStream open];
+    [outputStream open];
+    
+    while ([inputStream hasBytesAvailable] && [outputStream hasSpaceAvailable]) {
+        
+        uint8_t buffer[1024];
+        
+        NSInteger bytesRead = [inputStream read:buffer maxLength:1024];
+        if (inputStream.streamError || bytesRead < 0) {
+            error = inputStream.streamError;
+            break;
         }
-        [outputStream close];
-        [inputStream close];
         
-        receipt.progress.totalUnitCount = receipt.totalBytesExpectedToWrite;
-        receipt.progress.completedUnitCount = receipt.totalBytesWritten;
+        NSInteger bytesWritten = [outputStream write:buffer maxLength:(NSUInteger)bytesRead];
+        if (outputStream.streamError || bytesWritten < 0) {
+            error = outputStream.streamError;
+            break;
+        }
         
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if (receipt.progressBlock) {
-                receipt.progressBlock(receipt.progress,receipt);
-            }
-        });
+        if (bytesRead == 0 && bytesWritten == 0) {
+            break;
+        }
+    }
+    [outputStream close];
+    [inputStream close];
+    
+    receipt.progress.totalUnitCount = receipt.totalBytesExpectedToWrite;
+    receipt.progress.completedUnitCount = receipt.totalBytesWritten;
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (receipt.progressBlock) {
+            receipt.progressBlock(receipt.progress,receipt);
+        }
     });
+    
 }
 
 - (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didCompleteWithError:(NSError *)error {
@@ -496,37 +646,22 @@ didReceiveResponse:(NSURLResponse *)response
     if (error) {
         receipt.state = WKDownloadStateFailed;
         receipt.error = error;
-        receipt.failureBlock(task.originalRequest,(NSHTTPURLResponse *)task.response,error);
+        [_activityTasks removeObjectForKey:receipt.url];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            receipt.failureBlock(task.originalRequest, (NSHTTPURLResponse *)task.response, error);
+        });
     }
     else {
         [receipt.stream close];
         receipt.stream = nil;
         receipt.state = WKDownloadStateCompleted;
-        receipt.successBlock(task.originalRequest,(NSHTTPURLResponse *)task.response,task.originalRequest.URL);
+        [_activityTasks removeObjectForKey:receipt.url];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            receipt.successBlock(task.originalRequest, (NSHTTPURLResponse *)task.response, task.originalRequest.URL);
+        });
     }
-    [self saveAllDownloadReceipts:self.allDownloadReceipts];
 
-    //添加等待的任务
-    dispatch_async(self.synchronizationQueue, ^{
-        self.activeRequestCount--;
-        NSInteger i = 0;
-        while ([self isActivityRequestCountBelowMaxCount] && i <= self.queuedTasks.count-1) {
-            if (!self.queuedTasks.count) {
-                break;
-            }
-            WKDownloadReceipt *nextReceipt = self.queuedTasks[i];
-            if (nextReceipt.state == WKDownloadStateCompleted ||
-                nextReceipt.state == WKDownloadStateDownloading ||
-                nextReceipt.state == WKDownloadStateFailed) {
-                i++;
-                continue;
-            }
-            else {
-                [self resumeWithReceipt:nextReceipt];
-            }
-        }
-    });
-    
+    [self safelyStartNextReceipt];
 }
 
 @end
