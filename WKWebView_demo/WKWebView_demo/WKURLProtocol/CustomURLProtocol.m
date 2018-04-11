@@ -8,10 +8,11 @@
 
 #import "CustomURLProtocol.h"
 #import <UIKit/UIKit.h>
+#import <WebKit/WebKit.h>
 
 static NSString* const FilteredKey = @"FilteredKey";
 
-static UIImage * placeHolderImage() {
+static UIImage *placeHolderImage() {
     static UIImage *image;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
@@ -32,7 +33,7 @@ static UIImage * placeHolderImage() {
 @implementation CustomURLProtocol
 
 + (BOOL)canInitWithRequest:(NSURLRequest *)request {
-    NSLog(@"%@__%@", NSStringFromSelector(_cmd), request.URL.absoluteString);
+
     NSString* extension = request.URL.pathExtension;
     BOOL isImage = NO;
     if (extension.length > 0) {
@@ -51,6 +52,8 @@ static UIImage * placeHolderImage() {
             }
         }
     }
+
+    
     return [NSURLProtocol propertyForKey:FilteredKey inRequest:request] == nil && isImage;
 }
 + (NSURLRequest *)canonicalRequestForRequest:(NSURLRequest *)request {
@@ -68,6 +71,10 @@ static UIImage * placeHolderImage() {
     [self.client URLProtocol:self didReceiveResponse:response cacheStoragePolicy:NSURLCacheStorageAllowed];
     [self.client URLProtocol:self didLoadData:data];
     [self.client URLProtocolDidFinishLoading:self];
+    
+    
+    NSCachedURLResponse *res = [[NSURLCache sharedURLCache] cachedResponseForRequest:request];
+    NSLog(@"%@", res);
 }
 - (void)stopLoading {
     

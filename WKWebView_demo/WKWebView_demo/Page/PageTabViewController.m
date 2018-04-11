@@ -8,17 +8,25 @@
 
 #import "PageTabViewController.h"
 
+static const CGFloat kMaxzPosition = 0;
+
+static const CGFloat kMinzPosition = -140;
+
 //最大拉伸距离
 static const CGFloat kReservedStretchSpace = 150;
 //最小压缩距离
-static const CGFloat kReservedCompressSpace = 10;
+static const CGFloat kReservedCompressSpace = 50;
+//自动滑动系数因子，数值越大滑动越快
+static const CGFloat kAutoSpeedVelocity     = 10;
+//自动滑动时间因子，数值越大滑动时间越短
+static const CGFloat kAutoSrollDuractionVelocity = 750.0;
 
 @interface NodeView: UIView
 @property (nonatomic, weak) NodeView *nextView;
+
 @property (nonatomic, weak) NodeView *preView;
 //静止时的frame
 @property (nonatomic, assign) CGRect originRect;
-
 
 - (NodeView *)rootNode;
 - (void)updateNextY:(CGFloat)y;
@@ -42,7 +50,6 @@ static const CGFloat kReservedCompressSpace = 10;
 }
 
 - (NodeView *)shouldStretch {
-    
     if (!_preView) {//没有前节点，直接不能拉
         return nil;
     }
@@ -58,7 +65,7 @@ static const CGFloat kReservedCompressSpace = 10;
 
 //需要使用根节点调用对象方法
 - (NodeView *)shouldCompress {
-    if (!_preView) {//没有后节点，已经查找到最后，不能压，直接返回
+    if (!_preView) {//没有前节点，已经查找到最后，不能压，直接返回
         return nil;
     }
     if (self.frame.origin.y - _preView.frame.origin.y <= kReservedCompressSpace) {
@@ -141,6 +148,8 @@ static const CGFloat kReservedCompressSpace = 10;
 
 @property (nonatomic, strong) CADisplayLink *tiemr;
 
+@property (nonatomic, assign) NSInteger minVisiableCount;
+
 @end
 
 @implementation PageTabViewController {
@@ -150,31 +159,25 @@ static const CGFloat kReservedCompressSpace = 10;
     NodeView *_lastInsertView;
     NodeView *_activityView;
     
-    CGFloat _lastOffsetY;
+    CGFloat _lastOffsetY;//上一次滑动offset
+    CGFloat _fromOffsetY;//手势离开时的offset
+    CGFloat _endSpeed;//结束手势时的速度
     
-    CGFloat _fromOffsetY;
-    CGFloat _toOffsetY;
-    
-    CFTimeInterval _duraction;
-    CFTimeInterval _lastStep;
-    CFTimeInterval _timeOffset;
-    
+    CFTimeInterval _timeOffset;//自动滑动进行的时间长度
+    CFTimeInterval _duraction;//自动滑动总时长
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    _minVisiableCount = 3;
     self.view.backgroundColor = [UIColor whiteColor];
-    _duraction = 1.0;
     
     _scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(20, 100, self.view.frame.size.width-40, self.view.bounds.size.height-130)];
     _scrollView.backgroundColor = [UIColor grayColor];
     _scrollView.delegate = self;
     [self.view addSubview:_scrollView];
-    CATransform3D transform = CATransform3DIdentity;
-    transform.m34 = -1 / 500.0;
-    _scrollView.layer.sublayerTransform = transform;
-    _scrollView.contentSize = CGSizeMake(self.view.frame.size.width-40, 6 * kReservedStretchSpace + kReservedStretchSpace);
+    _scrollView.contentSize = CGSizeMake(self.view.frame.size.width-40, self.view.bounds.size.height-129);
 
     UIPanGestureRecognizer *pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(swipeView:)];
     pan.delegate = self;
@@ -192,6 +195,7 @@ static const CGFloat kReservedCompressSpace = 10;
 
 - (void)viewWillDisappear:(BOOL)animated {
     [_tiemr invalidate];
+    _tiemr = nil;
     [super viewWillDisappear:animated];
     [self.navigationController setNavigationBarHidden:YES animated:animated];
 }
@@ -215,32 +219,23 @@ static const CGFloat kReservedCompressSpace = 10;
 }
 
 #pragma mark - function
-- (float)interpolateFromValue:(float)fromValue time:(float)time
-{
-    return interpolate(fromValue, _toOffsetY, time);
-}
-
-float interpolate(float from, float to, float time)
-{
-    return (to - from) * time + from;
-}
-float CubicEaseOut(float p)
-{
-    float f = (p - 1);
-    return f * f * f * f * f + 1;
+/**
+ 二次方程：y = a * (x - h) * (x - h) + k;
+ 顶点（h , k）k为最终速度为0， h为总共运动时间
+ */
+float speed(float h, float y, float x) {
+    float a = y / (h * h);
+    return a * (x - h) * (x - h);
 }
 
 #pragma mark - private
 - (void)timeInvalidate {
     if (_tiemr) {
-        [_tiemr invalidate];
-        _tiemr = nil;
+        [_tiemr setPaused:YES];
     }
     
     _activityView = nil;
     _fromOffsetY = 0;
-    _toOffsetY = 0;
-    _lastStep = 0;
     _timeOffset = 0;
     _lastOffsetY = 0;
     
@@ -249,7 +244,7 @@ float CubicEaseOut(float p)
     }
 }
 
-- (void)deapPageScroll:(CGFloat)scrollOffsetY isAuto:(BOOL)isAuto {
+- (BOOL)deapPageScroll:(CGFloat)scrollOffsetY isAuto:(BOOL)isAuto {
     if (scrollOffsetY > _lastOffsetY && [_activityView shouldStretch]) {//可以拉伸
         //当前节点向前
         [_activityView updateStretchY:scrollOffsetY];
@@ -257,9 +252,8 @@ float CubicEaseOut(float p)
         _lastOffsetY = scrollOffsetY;
         if (!isAuto) {
             _fromOffsetY = scrollOffsetY;
-            _toOffsetY = scrollOffsetY + 60.0;
         }
-        return;
+        return YES;
     }
     
     if (scrollOffsetY < _lastOffsetY && [_activityView shouldCompress]) {//可以压缩
@@ -268,15 +262,15 @@ float CubicEaseOut(float p)
         _lastOffsetY = scrollOffsetY;
         if (!isAuto) {
             _fromOffsetY = scrollOffsetY;
-            _toOffsetY = scrollOffsetY - 60.0;
         }
-        return;
+        return YES;
     }
+   
+    return NO;
 }
 
 #pragma mark - SEL
 - (void)swipeView:(UIPanGestureRecognizer *)gesture {
-
     switch (gesture.state) {
         case UIGestureRecognizerStateChanged: {
             CGFloat offsetY = [gesture translationInView:gesture.view].y;
@@ -288,9 +282,24 @@ float CubicEaseOut(float p)
         case UIGestureRecognizerStateCancelled: {
             
             if (_activityView) {
-                _lastStep = CACurrentMediaTime();
-                _tiemr = [CADisplayLink displayLinkWithTarget:self selector:@selector(timePast:)];
-                [_tiemr addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+                _endSpeed = [gesture velocityInView:gesture.view].y;//获取最后速度
+                _duraction = 0;
+                _timeOffset = 0;
+                if (_endSpeed == 0) {
+                    return;
+                }
+
+                _duraction = fabs(_endSpeed) / kAutoSrollDuractionVelocity;
+
+                NSLog(@"|------ 拖动结束 (duraction: %f, endSpeed: %f) ------|\n", _duraction, _endSpeed);
+                
+                if (!_tiemr) {
+                    _tiemr = [CADisplayLink displayLinkWithTarget:self selector:@selector(timePast:)];
+                    [_tiemr setPaused:YES];
+                    [_tiemr addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+                }
+                
+                [_tiemr setPaused:NO];
             }
             else {
                 [self timeInvalidate];
@@ -304,17 +313,24 @@ float CubicEaseOut(float p)
 
 - (void)timePast:(CADisplayLink *)timer {
     
-    CFTimeInterval thisStep = CACurrentMediaTime();
-    CFTimeInterval stepDuration = thisStep - _lastStep;
-    _lastStep = thisStep;
-    _timeOffset = MIN(_timeOffset + stepDuration, _duraction);
-    float time = _timeOffset / _duraction;
-    time = CubicEaseOut(time);
+    _timeOffset = MIN(_timeOffset + timer.duration, _duraction);//最大动画时间
     
-    float offsetY = [self interpolateFromValue:_fromOffsetY time:time];
-    [self deapPageScroll:offsetY isAuto:YES];
+    //根据手指离开速度，做一个easeout的减速运动
+    //1、获取当前速度
+    _endSpeed = speed(_duraction, _fromOffsetY, _timeOffset);
+    //2、根据速度、运动时间获取当前运动距离
+    CGFloat offsetY = _endSpeed * timer.duration * kAutoSpeedVelocity;
+    //3、加上之前的运动距离
+    offsetY = offsetY + _lastOffsetY;
+    BOOL isStartBoundcesAnim = ![self deapPageScroll:offsetY isAuto:YES];
     
-    if (_timeOffset >= _duraction) {
+    
+    
+    if (isStartBoundcesAnim && _endSpeed != 0) {//开启弹性动画
+        NSLog(@"| ---- 开启弹性动画 ---- |");
+    }
+
+    if (_timeOffset >= _duraction || _endSpeed == 0) {
         [self timeInvalidate];
     }
 }
@@ -354,44 +370,33 @@ float CubicEaseOut(float p)
     return YES;
 }
 
-////只有当前手势失败时，才去执行其他手势
-//- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldBeRequiredToFailByGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
-//    return YES;
-//}
-
-#pragma mark - UIScrollViewDelegate
-//- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate {
-//    scrollView.scrollEnabled = YES;
-//    [scrollView setContentOffset:CGPointZero animated:YES];
-//}
-
 
 #pragma mark - create
 - (void)deapPages {
     
     CGFloat totalW = _scrollView.bounds.size.width;
     
-    NodeView *view1 = [self createLayerWithFrame:CGRectMake(0, 40, totalW, 300)];
+    NodeView *view1 = [self createLayerWithFrame:CGRectMake(0, 0, totalW, 300)];
     view1.originRect = CGRectMake(0, 40, totalW, 300);
     [_scrollView addSubview:view1];
 
-    NodeView *view2 = [self createLayerWithFrame:CGRectMake(0, 40+kReservedCompressSpace, totalW, 300)];
+    NodeView *view2 = [self createLayerWithFrame:CGRectMake(0, kReservedCompressSpace, totalW, 300)];
     view2.originRect = CGRectMake(0, 190, totalW, 300);
     [_scrollView addSubview:view2];
     
-    NodeView *view3 = [self createLayerWithFrame:CGRectMake(0, 40+2*kReservedCompressSpace, totalW, 300)];
+    NodeView *view3 = [self createLayerWithFrame:CGRectMake(0, 2*kReservedCompressSpace, totalW, 300)];
     view3.originRect = CGRectMake(0, 340, totalW, 300);
     [_scrollView addSubview:view3];
     
-    NodeView *view4 = [self createLayerWithFrame:CGRectMake(0, 40+3*kReservedCompressSpace, totalW, 300)];
+    NodeView *view4 = [self createLayerWithFrame:CGRectMake(0, 3*kReservedCompressSpace, totalW, 300)];
     view4.originRect = CGRectMake(0, 340, totalW, 300);
     [_scrollView addSubview:view4];
     
-    NodeView *view5 = [self createLayerWithFrame:CGRectMake(0, 40+3*kReservedCompressSpace+kReservedStretchSpace, totalW, 300)];
+    NodeView *view5 = [self createLayerWithFrame:CGRectMake(0, 3*kReservedCompressSpace+kReservedStretchSpace, totalW, 300)];
     view5.originRect = CGRectMake(0, 340, totalW, 300);
     [_scrollView addSubview:view5];
     
-    NodeView *view6 = [self createLayerWithFrame:CGRectMake(0, 40+3*kReservedCompressSpace+2*kReservedStretchSpace, totalW, 300)];
+    NodeView *view6 = [self createLayerWithFrame:CGRectMake(0, 3*kReservedCompressSpace+2*kReservedStretchSpace, totalW, 300)];
     view6.originRect = CGRectMake(0, 340, totalW, 300);
     [_scrollView addSubview:view6];
     
@@ -400,21 +405,26 @@ float CubicEaseOut(float p)
     _viewArray = @[view6, view5, view4, view3, view2, view1];
     
     view1.nextView = view2;
+    view1.transform = CGAffineTransformMakeScale(0.8, 0.8);
     
     view2.preView = view1;
     view2.nextView = view3;
-    
+    view2.transform = CGAffineTransformMakeScale(0.82, 0.82);
+
     view3.preView = view2;
     view3.nextView = view4;
-    
+    view3.transform = CGAffineTransformMakeScale(0.88, 0.88);
+
     view4.preView = view3;
     view4.nextView = view5;
-    
+    view4.transform = CGAffineTransformMakeScale(0.92, 0.92);
+
     view5.preView = view4;
     view5.nextView = view6;
-    
+    view5.transform = CGAffineTransformMakeScale(0.97, 0.97);
+
     view6.preView = view5;
-    
+
 }
 
 - (NodeView *)createLayerWithFrame:(CGRect)frame {
@@ -422,8 +432,8 @@ float CubicEaseOut(float p)
     NodeView *view = [[NodeView alloc] initWithFrame:frame];
     view.layer.backgroundColor = [UIColor colorWithWhite:0.7 alpha:1.0].CGColor;
     view.layer.cornerRadius = 8.0;
-    view.layer.zPosition    = -5;
-    
+    view.layer.anchorPoint = CGPointMake(0.5, 1);
+
     view.layer.shadowOpacity = 0.3;
     view.layer.shadowRadius  = 10;
     view.layer.shadowOffset  = CGSizeMake(0, -5);

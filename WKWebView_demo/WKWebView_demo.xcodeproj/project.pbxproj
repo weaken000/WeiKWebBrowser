@@ -10,6 +10,7 @@
 		4C0E19FB206B2D3B00A3F57A /* DeviceUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C0E19FA206B2D3B00A3F57A /* DeviceUtils.m */; };
 		4C0E1A00206B3AFF00A3F57A /* TabBarViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C0E19FD206B3AFF00A3F57A /* TabBarViewController.m */; };
 		4C0E1A01206B3AFF00A3F57A /* BaseNavigationController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C0E19FF206B3AFF00A3F57A /* BaseNavigationController.m */; };
+		4C41BF592079ADC80050B5BD /* WKHttpCookieManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C41BF582079ADC80050B5BD /* WKHttpCookieManager.m */; };
 		4C81B57720637BDC0083F209 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4CD1867D2061FF5000AD697D /* Main.storyboard */; };
 		4C81B59620637E540083F209 /* SDWebImageManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C81B57B20637E540083F209 /* SDWebImageManager.m */; };
 		4C81B59720637E540083F209 /* SDWebImageDecoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C81B57C20637E540083F209 /* SDWebImageDecoder.m */; };
@@ -26,7 +27,9 @@
 		4C81B5A220637E540083F209 /* UIView+WebCacheOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C81B59020637E540083F209 /* UIView+WebCacheOperation.m */; };
 		4C81B5A320637E540083F209 /* UIButton+WebCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C81B59420637E540083F209 /* UIButton+WebCache.m */; };
 		4C81B5A6206390AE0083F209 /* WKMessageHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C81B5A5206390AE0083F209 /* WKMessageHandler.m */; };
+		4C8C6491207CCDE500E5F3F0 /* TestTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C8C6490207CCDE500E5F3F0 /* TestTableViewController.m */; };
 		4C947C5B206E052E0023C5E4 /* TabWKWebView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C947C5A206E052E0023C5E4 /* TabWKWebView.m */; };
+		4C958307207D9CB4007CFDE0 /* WKFlowLayout.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C958306207D9CB4007CFDE0 /* WKFlowLayout.m */; };
 		4CA3B1B320734DA60066ED96 /* DownloadCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CA3B1B220734DA60066ED96 /* DownloadCell.m */; };
 		4CA978F22064E3450094EEF3 /* TabViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CA978F12064E3450094EEF3 /* TabViewController.m */; };
 		4CAA54EF206C809900176822 /* NSURL+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CAA54EE206C809800176822 /* NSURL+Extension.m */; };
@@ -70,6 +73,10 @@
 		4CAF90482071DCD70067E3F1 /* AFSecurityPolicy.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CAF90412071DCD70067E3F1 /* AFSecurityPolicy.m */; };
 		4CAF904C2071DEB50067E3F1 /* WKDownloadManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CAF904B2071DEB50067E3F1 /* WKDownloadManager.m */; };
 		4CAF9052207214810067E3F1 /* DownloadListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CAF9051207214810067E3F1 /* DownloadListViewController.m */; };
+		4CCCAFA62074C1B7008859CD /* WKAnimationAlert.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CCCAFA22074C1B7008859CD /* WKAnimationAlert.m */; };
+		4CCCAFA72074C1B7008859CD /* UIButton+ImageTitleSpacing.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CCCAFA32074C1B7008859CD /* UIButton+ImageTitleSpacing.m */; };
+		4CCCAFA82074C1B7008859CD /* AnimationUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CCCAFA42074C1B7008859CD /* AnimationUtils.m */; };
+		4CCCAFA92074C1B7008859CD /* WKAlertView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CCCAFA52074C1B7008859CD /* WKAlertView.m */; };
 		4CD186792061FF5000AD697D /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CD186782061FF5000AD697D /* AppDelegate.m */; };
 		4CD1867C2061FF5000AD697D /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CD1867B2061FF5000AD697D /* ViewController.m */; };
 		4CD1867F2061FF5000AD697D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4CD1867D2061FF5000AD697D /* Main.storyboard */; };
@@ -82,6 +89,7 @@
 		4CD186AE2062475200AD697D /* GradientProgressBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CD186AD2062475200AD697D /* GradientProgressBar.m */; };
 		4CD20D6D2073747400EC413A /* CustomURLProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CD20D6C2073747400EC413A /* CustomURLProtocol.m */; };
 		4CD20D702073782700EC413A /* NSURLProtocol+WebKitSupport.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CD20D6F2073782600EC413A /* NSURLProtocol+WebKitSupport.m */; };
+		4CD20D7A2073951A00EC413A /* TestViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CD20D792073951A00EC413A /* TestViewController.m */; };
 		4CE6819D20649BA200881CB5 /* TabManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CE6819C20649BA200881CB5 /* TabManager.m */; };
 		4CE681A020649BAD00881CB5 /* Tab.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CE6819F20649BAD00881CB5 /* Tab.m */; };
 		4CE681A62064A2FF00881CB5 /* WebViewCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CE681A52064A2FF00881CB5 /* WebViewCollectionViewCell.m */; };
@@ -112,6 +120,8 @@
 		4C0E19FD206B3AFF00A3F57A /* TabBarViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TabBarViewController.m; sourceTree = "<group>"; };
 		4C0E19FE206B3AFF00A3F57A /* TabBarViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TabBarViewController.h; sourceTree = "<group>"; };
 		4C0E19FF206B3AFF00A3F57A /* BaseNavigationController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseNavigationController.m; sourceTree = "<group>"; };
+		4C41BF572079ADC80050B5BD /* WKHttpCookieManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WKHttpCookieManager.h; sourceTree = "<group>"; };
+		4C41BF582079ADC80050B5BD /* WKHttpCookieManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WKHttpCookieManager.m; sourceTree = "<group>"; };
 		4C81B57920637E540083F209 /* UIImageView+WebCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImageView+WebCache.h"; sourceTree = "<group>"; };
 		4C81B57A20637E540083F209 /* NSData+ImageContentType.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+ImageContentType.h"; sourceTree = "<group>"; };
 		4C81B57B20637E540083F209 /* SDWebImageManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SDWebImageManager.m; sourceTree = "<group>"; };
@@ -143,8 +153,12 @@
 		4C81B59520637E540083F209 /* UIImage+GIF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+GIF.h"; sourceTree = "<group>"; };
 		4C81B5A4206390AE0083F209 /* WKMessageHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WKMessageHandler.h; sourceTree = "<group>"; };
 		4C81B5A5206390AE0083F209 /* WKMessageHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WKMessageHandler.m; sourceTree = "<group>"; };
+		4C8C648F207CCDE500E5F3F0 /* TestTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TestTableViewController.h; sourceTree = "<group>"; };
+		4C8C6490207CCDE500E5F3F0 /* TestTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TestTableViewController.m; sourceTree = "<group>"; };
 		4C947C59206E052E0023C5E4 /* TabWKWebView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TabWKWebView.h; sourceTree = "<group>"; };
 		4C947C5A206E052E0023C5E4 /* TabWKWebView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TabWKWebView.m; sourceTree = "<group>"; };
+		4C958305207D9CB4007CFDE0 /* WKFlowLayout.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WKFlowLayout.h; sourceTree = "<group>"; };
+		4C958306207D9CB4007CFDE0 /* WKFlowLayout.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WKFlowLayout.m; sourceTree = "<group>"; };
 		4CA3B1B120734DA60066ED96 /* DownloadCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DownloadCell.h; sourceTree = "<group>"; };
 		4CA3B1B220734DA60066ED96 /* DownloadCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DownloadCell.m; sourceTree = "<group>"; };
 		4CA978F02064E3440094EEF3 /* TabViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TabViewController.h; sourceTree = "<group>"; };
@@ -238,6 +252,14 @@
 		4CAF904B2071DEB50067E3F1 /* WKDownloadManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WKDownloadManager.m; sourceTree = "<group>"; };
 		4CAF9050207214810067E3F1 /* DownloadListViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DownloadListViewController.h; sourceTree = "<group>"; };
 		4CAF9051207214810067E3F1 /* DownloadListViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DownloadListViewController.m; sourceTree = "<group>"; };
+		4CCCAF9E2074C1B7008859CD /* UIButton+ImageTitleSpacing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIButton+ImageTitleSpacing.h"; sourceTree = "<group>"; };
+		4CCCAF9F2074C1B7008859CD /* WKAnimationAlert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WKAnimationAlert.h; sourceTree = "<group>"; };
+		4CCCAFA02074C1B7008859CD /* AnimationUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AnimationUtils.h; sourceTree = "<group>"; };
+		4CCCAFA12074C1B7008859CD /* WKAlertView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WKAlertView.h; sourceTree = "<group>"; };
+		4CCCAFA22074C1B7008859CD /* WKAnimationAlert.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WKAnimationAlert.m; sourceTree = "<group>"; };
+		4CCCAFA32074C1B7008859CD /* UIButton+ImageTitleSpacing.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIButton+ImageTitleSpacing.m"; sourceTree = "<group>"; };
+		4CCCAFA42074C1B7008859CD /* AnimationUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AnimationUtils.m; sourceTree = "<group>"; };
+		4CCCAFA52074C1B7008859CD /* WKAlertView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WKAlertView.m; sourceTree = "<group>"; };
 		4CD186742061FF5000AD697D /* WKWebView_demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WKWebView_demo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4CD186772061FF5000AD697D /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		4CD186782061FF5000AD697D /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -262,6 +284,8 @@
 		4CD20D6C2073747400EC413A /* CustomURLProtocol.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CustomURLProtocol.m; sourceTree = "<group>"; };
 		4CD20D6E2073782600EC413A /* NSURLProtocol+WebKitSupport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSURLProtocol+WebKitSupport.h"; sourceTree = "<group>"; };
 		4CD20D6F2073782600EC413A /* NSURLProtocol+WebKitSupport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSURLProtocol+WebKitSupport.m"; sourceTree = "<group>"; };
+		4CD20D782073951A00EC413A /* TestViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TestViewController.h; sourceTree = "<group>"; };
+		4CD20D792073951A00EC413A /* TestViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TestViewController.m; sourceTree = "<group>"; };
 		4CE6819B20649BA200881CB5 /* TabManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TabManager.h; sourceTree = "<group>"; };
 		4CE6819C20649BA200881CB5 /* TabManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TabManager.m; sourceTree = "<group>"; };
 		4CE6819E20649BAD00881CB5 /* Tab.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Tab.h; sourceTree = "<group>"; };
@@ -521,6 +545,21 @@
 			path = WKDownLoad;
 			sourceTree = "<group>";
 		};
+		4CCCAF9D2074C1B7008859CD /* WKAlert */ = {
+			isa = PBXGroup;
+			children = (
+				4CCCAF9E2074C1B7008859CD /* UIButton+ImageTitleSpacing.h */,
+				4CCCAFA32074C1B7008859CD /* UIButton+ImageTitleSpacing.m */,
+				4CCCAF9F2074C1B7008859CD /* WKAnimationAlert.h */,
+				4CCCAFA22074C1B7008859CD /* WKAnimationAlert.m */,
+				4CCCAFA02074C1B7008859CD /* AnimationUtils.h */,
+				4CCCAFA42074C1B7008859CD /* AnimationUtils.m */,
+				4CCCAFA12074C1B7008859CD /* WKAlertView.h */,
+				4CCCAFA52074C1B7008859CD /* WKAlertView.m */,
+			);
+			path = WKAlert;
+			sourceTree = "<group>";
+		};
 		4CD1866B2061FF5000AD697D = {
 			isa = PBXGroup;
 			children = (
@@ -557,12 +596,19 @@
 				4CAA55BD206CE7F100176822 /* MainPage */,
 				4C0E19FC206B3AFE00A3F57A /* BaseNavigationController.h */,
 				4C0E19FF206B3AFF00A3F57A /* BaseNavigationController.m */,
+				4CCCAF9D2074C1B7008859CD /* WKAlert */,
 				4C0E19FE206B3AFF00A3F57A /* TabBarViewController.h */,
 				4C0E19FD206B3AFF00A3F57A /* TabBarViewController.m */,
 				4CD186772061FF5000AD697D /* AppDelegate.h */,
 				4CD186782061FF5000AD697D /* AppDelegate.m */,
 				4C81B5A4206390AE0083F209 /* WKMessageHandler.h */,
 				4C81B5A5206390AE0083F209 /* WKMessageHandler.m */,
+				4CD20D782073951A00EC413A /* TestViewController.h */,
+				4CD20D792073951A00EC413A /* TestViewController.m */,
+				4C8C648F207CCDE500E5F3F0 /* TestTableViewController.h */,
+				4C8C6490207CCDE500E5F3F0 /* TestTableViewController.m */,
+				4C958305207D9CB4007CFDE0 /* WKFlowLayout.h */,
+				4C958306207D9CB4007CFDE0 /* WKFlowLayout.m */,
 				4C0E19F7206B2BB500A3F57A /* Config.h */,
 				4CD1867D2061FF5000AD697D /* Main.storyboard */,
 				4CD186802061FF5000AD697D /* Assets.xcassets */,
@@ -598,6 +644,8 @@
 				4CD20D6F2073782600EC413A /* NSURLProtocol+WebKitSupport.m */,
 				4CD20D6B2073747400EC413A /* CustomURLProtocol.h */,
 				4CD20D6C2073747400EC413A /* CustomURLProtocol.m */,
+				4C41BF572079ADC80050B5BD /* WKHttpCookieManager.h */,
+				4C41BF582079ADC80050B5BD /* WKHttpCookieManager.m */,
 			);
 			path = WKURLProtocol;
 			sourceTree = "<group>";
@@ -753,6 +801,7 @@
 				4CE681A020649BAD00881CB5 /* Tab.m in Sources */,
 				4CADFD47206B47EB00F74098 /* View+MASAdditions.m in Sources */,
 				4CAF90442071DCD70067E3F1 /* AFHTTPSessionManager.m in Sources */,
+				4C958307207D9CB4007CFDE0 /* WKFlowLayout.m in Sources */,
 				4CADFD25206B467400F74098 /* InputURLView.m in Sources */,
 				4C81B59720637E540083F209 /* SDWebImageDecoder.m in Sources */,
 				4CAF90482071DCD70067E3F1 /* AFSecurityPolicy.m in Sources */,
@@ -771,8 +820,11 @@
 				4C81B59920637E540083F209 /* SDWebImageDownloader.m in Sources */,
 				4C81B59620637E540083F209 /* SDWebImageManager.m in Sources */,
 				4CADFD46206B47EB00F74098 /* NSArray+MASAdditions.m in Sources */,
+				4CCCAFA62074C1B7008859CD /* WKAnimationAlert.m in Sources */,
 				4C81B5A220637E540083F209 /* UIView+WebCacheOperation.m in Sources */,
 				4C81B59C20637E540083F209 /* SDWebImageCompat.m in Sources */,
+				4CD20D7A2073951A00EC413A /* TestViewController.m in Sources */,
+				4C8C6491207CCDE500E5F3F0 /* TestTableViewController.m in Sources */,
 				4CAF90462071DCD70067E3F1 /* AFURLRequestSerialization.m in Sources */,
 				4CADFD53206B6B7300F74098 /* AbilityTypeHomeView.m in Sources */,
 				4CADFD48206B47EB00F74098 /* MASConstraint.m in Sources */,
@@ -786,13 +838,16 @@
 				4CADFD64206B792C00F74098 /* AbilityTypeCollectCell.m in Sources */,
 				4CADFD4A206B47EB00F74098 /* MASViewAttribute.m in Sources */,
 				4C81B5A6206390AE0083F209 /* WKMessageHandler.m in Sources */,
+				4CCCAFA82074C1B7008859CD /* AnimationUtils.m in Sources */,
 				4C81B5A020637E540083F209 /* NSData+ImageContentType.m in Sources */,
 				4C81B59E20637E540083F209 /* SDImageCache.m in Sources */,
 				4CADFD5E206B763600F74098 /* AbilityTypeHomeHeaderReusableView.m in Sources */,
 				4CADFD58206B6D7600F74098 /* AbilityTypeHomeURLCell.m in Sources */,
+				4C41BF592079ADC80050B5BD /* WKHttpCookieManager.m in Sources */,
 				4CADFD49206B47EB00F74098 /* MASViewConstraint.m in Sources */,
 				4C0E19FB206B2D3B00A3F57A /* DeviceUtils.m in Sources */,
 				4C947C5B206E052E0023C5E4 /* TabWKWebView.m in Sources */,
+				4CCCAFA92074C1B7008859CD /* WKAlertView.m in Sources */,
 				4CAF9052207214810067E3F1 /* DownloadListViewController.m in Sources */,
 				4CAF90342071D3120067E3F1 /* BrowserModuleConfig.m in Sources */,
 				4CAA55C0206CE83C00176822 /* DataBaseHelper.m in Sources */,
@@ -802,6 +857,7 @@
 				4CD186872061FF5000AD697D /* main.m in Sources */,
 				4CADFD6D206B817900F74098 /* YZLBiddingTypeView.m in Sources */,
 				4CAA55B8206CE65600176822 /* FMResultSet.m in Sources */,
+				4CCCAFA72074C1B7008859CD /* UIButton+ImageTitleSpacing.m in Sources */,
 				4CAA55B5206CE65600176822 /* FMDatabaseAdditions.m in Sources */,
 				4CAA55B7206CE65600176822 /* FMDatabasePool.m in Sources */,
 				4CD186AE2062475200AD697D /* GradientProgressBar.m in Sources */,
@@ -973,7 +1029,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 4Z223V4SGH;
 				INFOPLIST_FILE = WKWebView_demo/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "weaken.WKWebView-demo";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -988,7 +1044,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 4Z223V4SGH;
 				INFOPLIST_FILE = WKWebView_demo/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "weaken.WKWebView-demo";
 				PRODUCT_NAME = "$(TARGET_NAME)";

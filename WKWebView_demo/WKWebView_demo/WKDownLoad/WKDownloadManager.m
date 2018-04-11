@@ -394,7 +394,7 @@ typedef void (^progressBlock)(NSProgress * _Nonnull, WKDownloadReceipt *);
         if (!task) {
             NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:receipt.url]];
             request.HTTPMethod = @"GET";
-            NSString *range = [NSString stringWithFormat:@"bytes=%zd-", receipt.totalBytesWritten];
+            NSString *range = [NSString stringWithFormat:@"bytes=%lld-", receipt.totalBytesWritten];
             [request setValue:range forHTTPHeaderField:@"Range"];
             task = [self.session dataTaskWithRequest:request];
             task.taskDescription = receipt.url;

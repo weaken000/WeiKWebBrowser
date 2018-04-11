@@ -11,6 +11,7 @@
 #import "GradientProgressBar.h"
 #import "InputURLView.h"
 
+#import "WKHttpCookieManager.h"
 #import "TabManager.h"
 #import "Tab.h"
 #import "DataBaseHelper.h"
@@ -22,6 +23,8 @@
 #import "PageTabViewController.h"
 #import "AbilityTypeViewController.h"
 #import "DownloadListViewController.h"
+#import "TestViewController.h"
+#import "TestTableViewController.h"
 
 #import "Masonry.h"
 #import <JavaScriptCore/JavaScriptCore.h>
@@ -59,6 +62,13 @@
     _tabManager.tabDelegate = self;
     
     [self setupSubviews];
+    
+    [[WKHttpCookieManager sharedInstance] clearCookieCache:^{
+        [[WKWebsiteDataStore defaultDataStore] fetchDataRecordsOfTypes:[WKWebsiteDataStore allWebsiteDataTypes] completionHandler:^(NSArray<WKWebsiteDataRecord *> *records) {
+            NSLog(@"%zd", records.count);
+        }];
+    }];
+    
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -147,6 +157,8 @@
         make.edges.mas_equalTo(UIEdgeInsetsZero);
     }];
     
+    
+    
 //    [DataBaseHelper selectBrowsedWhereCondition:@"where type = 1" complete:^(BOOL success, NSArray *array) {
 //        if (success && array.count) {
 //
@@ -221,10 +233,14 @@
         components.path = url.path;
         url = components.URL;
     }
+    ;
     NSURLRequest *request = [NSURLRequest requestWithURL:url];
     [_tabManager.selectTab.webView loadRequest:request];
     
     [_tabToolbar updateState:@(YES) forIndex:0];
+    
+    
+    
 }
 
 - (void)showTab:(Tab *)tab {
@@ -424,7 +440,9 @@
         [self removeObserversForWebView:_tabManager.selectTab.webView];
     }
     else {//
-        [self showOthers];
+//        [self showOthers];
+//        [self.navigationController pushViewController:[TestTableViewController new] animated:YES];
+       [self.navigationController pushViewController:[PageTabViewController new] animated:YES];
     }
 }
 

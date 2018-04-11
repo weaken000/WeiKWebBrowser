@@ -25,12 +25,34 @@ static WKProcessPool *siglePool;
 #pragma mark - getter
 - (TabWKWebView *)webView {
     if (!_webView) {
+        
         WKWebViewConfiguration *config = [[WKWebViewConfiguration alloc] init];
-        config.preferences = [WKPreferences new];
-        config.preferences.javaScriptEnabled = YES;
-        config.preferences.javaScriptCanOpenWindowsAutomatically = NO;
-        config.processPool = siglePool;//共享同一个pool，共享cookie
+        
+        //偏好设置
+        WKPreferences *preferences = [[WKPreferences alloc] init];
+        preferences = [WKPreferences new];
+        preferences.javaScriptEnabled = YES;
+        preferences.javaScriptCanOpenWindowsAutomatically = NO;
+        config.preferences = preferences;
+        
+        //共享进程池，表示共享不同webView之间的cookie等
+        config.processPool = siglePool;
+        
+        //注入js对象，处理js调用oc
+        WKUserContentController *userContentController = [[WKUserContentController alloc] init];
+//        [userContentController addScriptMessageHandler:self name:@"iosInstance"];
+        //注入js代码
+//        WKUserScript *userScript = [[WKUserScript alloc] initWithSource:@"" injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:NO];
+//        [userContentController addUserScript:userScript];
+        config.userContentController = userContentController;
+        
+        if ([[UIDevice currentDevice].systemVersion floatValue] >= 9.0) {
+            //设置储存
+            config.websiteDataStore = [WKWebsiteDataStore defaultDataStore];
+        }
+        
         _webView = [[TabWKWebView alloc] initWithFrame:CGRectZero configuration:config];
+    
     }
     return _webView;
 }

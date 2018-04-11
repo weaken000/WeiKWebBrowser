@@ -76,9 +76,9 @@
         if (coor) {
             NSString *version = [UIDevice currentDevice].systemVersion;
             if (version.doubleValue >= 10.0) {
-                [coor notifyWhenInteractionChangesUsingBlock:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
-                    [self dealInteractionChanges:context];
-                }];
+//                [coor notifyWhenInteractionChangesUsingBlock:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
+//                    [self dealInteractionChanges:context];
+//                }];
             }
             else {
 //                [coor notifyWhenInteractionEndsUsingBlock:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {

@@ -161,16 +161,37 @@ static pthread_mutex_t pLock;
 }
 
 
-#pragma mark - WKNavigationDelegate
-// 页面开始加载时调用
+#pragma mark - WKNavigationDelegate（调用顺序）
+// 在发送请求之前，决定是否跳转
+- (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler{
+    decisionHandler(WKNavigationActionPolicyAllow);
+}
+//https身份验证
+//- (void)webView:(WKWebView *)webView didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(NSURLSessionAuthChallengeDisposition, NSURLCredential * _Nullable))completionHandler{
+//    //用户身份信息
+//    NSURLCredential *newCred = [NSURLCredential credentialWithUser:@"" password:@"" persistence:NSURLCredentialPersistenceNone];
+//    // 为 challenge 的发送方提供 credential
+//    [[challenge sender] useCredential:newCred forAuthenticationChallenge:challenge];
+//    completionHandler(NSURLSessionAuthChallengeUseCredential,newCred);
+//}
+// 在收到响应后，决定是否跳转
+- (void)webView:(WKWebView *)webView decidePolicyForNavigationResponse:(WKNavigationResponse *)navigationResponse decisionHandler:(void (^)(WKNavigationResponsePolicy))decisionHandler {
+    decisionHandler(WKNavigationResponsePolicyAllow);
+}
+
+//页面开始加载时调用
 - (void)webView:(WKWebView *)webView didStartProvisionalNavigation:(WKNavigation *)navigation {
     
 }
-// 当内容开始返回时调用
+//接收到服务器跳转请求之后调用：重定向
+- (void)webView:(WKWebView *)webView didReceiveServerRedirectForProvisionalNavigation:(WKNavigation *)navigation {
+    
+}
+//当内容开始返回时调用
 - (void)webView:(WKWebView *)webView didCommitNavigation:(WKNavigation *)navigation {
     
 }
-// 页面加载完成之后调用
+//页面加载完成之后调用
 - (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation {
     
     BOOL flag = [self isCollectWithWebView:webView];
@@ -211,60 +232,15 @@ static pthread_mutex_t pLock;
     }
     
     
-//    static  NSString * const jsGetImages =
-//    @"function getImages(){\
-//    var objs = document.getElementsByTagName(\"img\");\
-//    var imgScr = '';\
-//    for(var i=0;i<objs.length;i++){\
-//    imgScr = imgScr + objs[i].src + '+';\
-//    };\
-//    return imgScr;\
-//    };";
-//
-//    [webView evaluateJavaScript:jsGetImages completionHandler:nil];
-//    [webView evaluateJavaScript:@"getImages()" completionHandler:^(id _Nullable result, NSError * _Nullable error) {
-//
-//        NSArray *urlArray = [NSMutableArray arrayWithArray:[result componentsSeparatedByString:@"+"]];
-//        //urlResurlt 就是获取到得所有图片的url的拼接；mUrlArray就是所有Url的数组
-//        NSLog(@"--%@",urlArray);
+//    [[WKWebsiteDataStore defaultDataStore] fetchDataRecordsOfTypes:[WKWebsiteDataStore allWebsiteDataTypes] completionHandler:^(NSArray<WKWebsiteDataRecord *> *records) {
+//        NSLog(@"%zd", records.count);
 //    }];
-    
 }
 // 页面加载失败时调用
-- (void)webView:(WKWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation{
-}
-// 接收到服务器跳转请求之后调用
-- (void)webView:(WKWebView *)webView didReceiveServerRedirectForProvisionalNavigation:(WKNavigation *)navigation{
+- (void)webView:(WKWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation {
     
 }
-// 在收到响应后，决定是否跳转
-- (void)webView:(WKWebView *)webView decidePolicyForNavigationResponse:(WKNavigationResponse *)navigationResponse decisionHandler:(void (^)(WKNavigationResponsePolicy))decisionHandler{
-    decisionHandler(WKNavigationResponsePolicyAllow);
-}
-// 在发送请求之前，决定是否跳转
-- (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler{
-    
-    //NSLog(@"%@___%@", NSStringFromSelector(_cmd), navigationAction.request.URL.absoluteString);
-    //允许跳转
-    
-    //    WKHTTPCookieStore *cookieStore = webView.configuration.websiteDataStore.httpCookieStore;
-    //    [cookieStore getAllCookies:^(NSArray<NSHTTPCookie *> *obj) {
-    //        for (NSHTTPCookie *cookie in obj) {
-    //            NSLog(@"\n%@\n", cookie);
-    //        }
-    //    }];
-    
-    
-    
-//    [[WKWebsiteDataStore defaultDataStore] fetchDataRecordsOfTypes:[NSSet setWithArray:@[WKWebsiteDataTypeCookies, WKWebsiteDataTypeSessionStorage]] completionHandler:^(NSArray<WKWebsiteDataRecord *> *array) {
-//        for (WKWebsiteDataRecord *record in array) {
-//            NSLog(@"%@", record);
-//        }
-//    }];
-    
-    decisionHandler(WKNavigationActionPolicyAllow);
-}
-//MARK: 防止白屏
+//进程被终止时调用，防止白屏
 - (void)webViewWebContentProcessDidTerminate:(WKWebView *)webView {
     [webView reload];
 }
@@ -286,15 +262,19 @@ static pthread_mutex_t pLock;
     
     return tab.webView;
 }
-// 输入框
+//关闭一个webview
+- (void)webViewDidClose:(WKWebView *)webView {
+    
+}
+//输入框
 - (void)webView:(WKWebView *)webView runJavaScriptTextInputPanelWithPrompt:(NSString *)prompt defaultText:(nullable NSString *)defaultText initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(NSString * __nullable result))completionHandler{
     completionHandler(@"http");
 }
-// 确认框
+//确认框
 - (void)webView:(WKWebView *)webView runJavaScriptConfirmPanelWithMessage:(NSString *)message initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(BOOL result))completionHandler{
     completionHandler(YES);
 }
-// 警告框
+//警告框
 - (void)webView:(WKWebView *)webView runJavaScriptAlertPanelWithMessage:(NSString *)message initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(void))completionHandler{
     NSLog(@"%@",message);
     completionHandler();
