@@ -30,6 +30,7 @@
 		4C8C6491207CCDE500E5F3F0 /* TestTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C8C6490207CCDE500E5F3F0 /* TestTableViewController.m */; };
 		4C947C5B206E052E0023C5E4 /* TabWKWebView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C947C5A206E052E0023C5E4 /* TabWKWebView.m */; };
 		4C958307207D9CB4007CFDE0 /* WKFlowLayout.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C958306207D9CB4007CFDE0 /* WKFlowLayout.m */; };
+		4C95830A207E0C1E007CFDE0 /* PageSigleNodeView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C958309207E0C1E007CFDE0 /* PageSigleNodeView.m */; };
 		4CA3B1B320734DA60066ED96 /* DownloadCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CA3B1B220734DA60066ED96 /* DownloadCell.m */; };
 		4CA978F22064E3450094EEF3 /* TabViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CA978F12064E3450094EEF3 /* TabViewController.m */; };
 		4CAA54EF206C809900176822 /* NSURL+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CAA54EE206C809800176822 /* NSURL+Extension.m */; };
@@ -159,6 +160,8 @@
 		4C947C5A206E052E0023C5E4 /* TabWKWebView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TabWKWebView.m; sourceTree = "<group>"; };
 		4C958305207D9CB4007CFDE0 /* WKFlowLayout.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WKFlowLayout.h; sourceTree = "<group>"; };
 		4C958306207D9CB4007CFDE0 /* WKFlowLayout.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WKFlowLayout.m; sourceTree = "<group>"; };
+		4C958308207E0C1E007CFDE0 /* PageSigleNodeView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PageSigleNodeView.h; sourceTree = "<group>"; };
+		4C958309207E0C1E007CFDE0 /* PageSigleNodeView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PageSigleNodeView.m; sourceTree = "<group>"; };
 		4CA3B1B120734DA60066ED96 /* DownloadCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DownloadCell.h; sourceTree = "<group>"; };
 		4CA3B1B220734DA60066ED96 /* DownloadCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DownloadCell.m; sourceTree = "<group>"; };
 		4CA978F02064E3440094EEF3 /* TabViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TabViewController.h; sourceTree = "<group>"; };
@@ -380,6 +383,8 @@
 				4CAAACA9206887A500499868 /* PageTabViewController.m */,
 				4CAA54F1206C860D00176822 /* WebViewTranstion.h */,
 				4CAA54F2206C860D00176822 /* WebViewTranstion.m */,
+				4C958308207E0C1E007CFDE0 /* PageSigleNodeView.h */,
+				4C958309207E0C1E007CFDE0 /* PageSigleNodeView.m */,
 			);
 			path = Page;
 			sourceTree = "<group>";
@@ -849,6 +854,7 @@
 				4C947C5B206E052E0023C5E4 /* TabWKWebView.m in Sources */,
 				4CCCAFA92074C1B7008859CD /* WKAlertView.m in Sources */,
 				4CAF9052207214810067E3F1 /* DownloadListViewController.m in Sources */,
+				4C95830A207E0C1E007CFDE0 /* PageSigleNodeView.m in Sources */,
 				4CAF90342071D3120067E3F1 /* BrowserModuleConfig.m in Sources */,
 				4CAA55C0206CE83C00176822 /* DataBaseHelper.m in Sources */,
 				4CADFD67206B7B6E00F74098 /* AbilityTypeHistoryView.m in Sources */,

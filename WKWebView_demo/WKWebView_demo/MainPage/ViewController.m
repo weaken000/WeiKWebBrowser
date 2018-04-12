@@ -441,8 +441,8 @@
     }
     else {//
 //        [self showOthers];
-//        [self.navigationController pushViewController:[TestTableViewController new] animated:YES];
-       [self.navigationController pushViewController:[PageTabViewController new] animated:YES];
+        [self.navigationController pushViewController:[TestTableViewController new] animated:YES];
+//       [self.navigationController pushViewController:[[PageTabViewController alloc] initWithItemCount:8] animated:YES];
     }
 }
 

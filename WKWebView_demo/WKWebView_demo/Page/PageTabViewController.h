@@ -8,6 +8,11 @@
 
 #import <UIKit/UIKit.h>
 
+
+extern const CGFloat kReservedStretchSpace, kReservedCompressSpace, kTopMargin;
+
 @interface PageTabViewController : UIViewController
+
+- (instancetype)initWithItemCount:(NSInteger)itemCount;
 
 @end

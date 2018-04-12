@@ -22,13 +22,15 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    self.view.backgroundColor = [UIColor whiteColor];
+    
     _heightArray = [NSMutableArray array];
     [_heightArray addObjectsFromArray:@[[UIColor blueColor], [UIColor greenColor], [UIColor yellowColor], [UIColor redColor], [UIColor grayColor], [UIColor purpleColor]]];
     
     WKFlowLayout *layout = [WKFlowLayout new];
     layout.itemCount = _heightArray.count;
     if (@available(iOS 11.0, *)) {
-        _collectionView = [[UICollectionView alloc] initWithFrame:CGRectMake(40, 100, self.view.bounds.size.width-80, self.view.bounds.size.height-80) collectionViewLayout:layout];
+        _collectionView = [[UICollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
         _collectionView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
     } else {
         // Fallback on earlier versions
@@ -38,6 +40,12 @@
     [_collectionView registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:@"cell"];
     [self.view addSubview:_collectionView];
     
+}
+
+- (void)viewWillLayoutSubviews {
+    if (@available(iOS 11.0, *)) {
+        self.collectionView.frame = CGRectMake(self.view.safeAreaInsets.left+20, self.view.safeAreaInsets.top+10, self.view.bounds.size.width-40, self.view.bounds.size.height-20-self.view.safeAreaInsets.top-self.view.safeAreaInsets.bottom);
+    }
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -65,6 +73,7 @@
     }
     cell.backgroundColor = _heightArray[indexPath.item];
     lab.text = [NSString stringWithFormat:@"卡片-%zd", indexPath.item];
+
     return cell;
 }
 
